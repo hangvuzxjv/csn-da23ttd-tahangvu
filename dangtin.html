@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Tin Mới - Cộng Đồng Thủy Sản</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-50">
+
+    <header class="sticky top-0 z-50 bg-white shadow-md">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <a href="index.html" class="text-xl font-bold text-teal-600">SeaTech</a>
+            </div>
+
+            <nav class="hidden lg:flex space-x-6 text-sm font-medium">
+                <nav class="hidden lg:flex space-x-6 text-sm font-medium">
+                    <a href="index.html" class="text-gray-600 hover:text-teal-600">Trang Chủ</a>
+                    <a href="tintuc.html" class="text-gray-600 hover:text-teal-600">Tin Tức</a>
+                    <a href="kythuat.html" class="text-gray-600 hover:text-teal-600">Thông tin/Kỹ Thuật Nuôi Trồng</a>
+                    <a href="dangtin.html" class="text-gray-600 hover:text-teal-600">Đăng Tin</a> 
+                </nav>
+            </nav>
+
+            <div class="flex items-center space-x-4">
+                
+                <div class="relative hidden sm:block">
+                    <input type="text" id="search-input" placeholder="Tìm kiếm bài viết..." class="pl-10 pr-4 py-1 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm w-40">
+                    <button class="absolute left-0 top-0 mt-1 ml-3 text-gray-400" onclick="performSearch()">🔍</button>
+                </div>
+                
+    
+                <div id="auth-buttons">
+                    <a href="dangnhap.html" class="text-sm font-medium text-gray-600 hover:text-teal-600">Đăng Nhập</a>
+                    <a href="dangky.html" class="ml-2 px-3 py-1 bg-teal-600 text-white text-sm font-medium rounded-full hover:bg-teal-700 transition">Đăng Ký</a>
+                </div>
+
+                <div id="user-profile" class="hidden relative">
+                    <button class="flex items-center space-x-2 text-gray-700 hover:text-teal-600" id="user-menu-btn">
+                        <img src="img/avt1.jpg" alt="Avatar" class="w-8 h-8 rounded-full border-2 border-teal-500">
+                        <span class="text-sm font-medium">user_tv</span>
+                    </button>
+                    <div id="user-menu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden">
+                        <a href="profile.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"> Profile (0 bài)</a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onclick="logout()"> Đăng Xuất</a>
+                    </div>
+                </div>
+
+                 <button id="mobile-menu-toggle" class="lg:hidden text-gray-600 hover:text-teal-600">☰</button>
+            </div>
+        </div>
+
+        <div id="mobile-menu" class="lg:hidden bg-white border-t hidden">
+            <nav class="flex flex-col space-y-2 p-4 text-sm font-medium">
+                <a href="index.html" class="text-gray-600 hover:text-teal-600">Trang Chủ</a>
+                <a href="tintuc.html" class="text-gray-600 hover:text-teal-600">Tin Tức</a>
+                <a href="kythuat.html" class="text-gray-600 hover:text-teal-600">Thông tin/Kỹ Thuật Nuôi Trồng</a>
+            </nav>
+        </div>
+    </header>
+    <main class="container mx-auto px-4 py-10">
+        <h1 class="text-4xl font-extrabold text-teal-600 mb-2">Đăng Tin Mới</h1>
+        <p class="text-gray-600 mb-8">Chia sẻ kinh nghiệm, đặt câu hỏi hoặc đăng tin tức liên quan đến thủy sản Trà Vinh.</p>
+        
+        <form id="post-form" class="bg-white p-6 md:p-10 rounded-xl shadow-lg border-t-4 border-teal-600 space-y-6">
+            
+            <div>
+                <label for="post-title" class="block text-lg font-medium text-gray-700 mb-2">Tiêu đề bài viết <span class="text-red-500">*</span></label>
+                <input type="text" id="post-title" name="post-title" required 
+                       class="w-full border border-gray-300 rounded-lg p-3 focus:ring-teal-500 focus:border-teal-500"
+                       placeholder="Ví dụ: Cảnh báo bệnh gan tụy cấp đang bùng phát ở Duyên Hải">
+            </div>
+
+            <div>
+                <label for="post-content" class="block text-lg font-medium text-gray-700 mb-2">Nội dung chi tiết <span class="text-red-500">*</span></label>
+                <textarea id="post-content" name="post-content" rows="10" required 
+                          class="w-full border border-gray-300 rounded-lg p-3 focus:ring-teal-500 focus:border-teal-500"
+                          placeholder="Viết nội dung bài đăng của bạn tại đây..."></textarea>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <div>
+                    <label for="post-category" class="block text-lg font-medium text-gray-700 mb-2">Phân loại chính <span class="text-red-500">*</span></label>
+                    <select id="post-category" name="post-category" required
+                            class="w-full border border-gray-300 rounded-lg p-3 text-gray-700 focus:ring-teal-500 focus:border-teal-500">
+                        <option value="">-- Chọn danh mục --</option>
+                        <option value="kinh-nghiem">Chia sẻ Kinh nghiệm Nuôi</option>
+                        <option value="cau-hoi">Hỏi đáp/Nhờ trợ giúp</option>
+                        <option value="canh-bao">Cảnh báo Dịch bệnh/Môi trường</option>
+                        <option>Tin tức khác</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="post-tags" class="block text-lg font-medium text-gray-700 mb-2">Từ khóa/Tags (Phân loại chi tiết)</label>
+                    <input type="text" id="post-tags" name="post-tags" 
+                           class="w-full border border-gray-300 rounded-lg p-3 focus:ring-teal-500 focus:border-teal-500"
+                           placeholder="Ví dụ: Tôm Thẻ, Duyên Hải, Dịch bệnh, Thức ăn">
+                    <p class="text-sm text-gray-500 mt-1">Các từ khóa giúp người khác dễ dàng tìm thấy bài viết của bạn.</p>
+                </div>
+            </div>
+
+            <div>
+                <label for="post-media" class="block text-lg font-medium text-gray-700 mb-2">Thêm Ảnh/Video minh họa (Tùy chọn)</label>
+                <input type="file" id="post-media" name="post-media" accept="image/*,video/*" multiple 
+                       class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100">
+                <p class="text-sm text-gray-500 mt-1">Tối đa 5 file (ảnh hoặc video).</p>
+            </div>
+            
+            <div class="pt-4 flex justify-end space-x-4">
+                <button type="button" class="px-6 py-3 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-100 transition">Hủy</button>
+                <button type="submit" class="px-8 py-3 bg-teal-600 text-white text-lg font-bold rounded-lg hover:bg-teal-700 transition shadow-md hover:shadow-lg">Đăng Bài Ngay</button>
+            </div>
+
+        </form>
+    </main>
+    <footer class="bg-gray-900 text-white mt-12 pt-10 pb-6">
+    <div class="container mx-auto px-4">
+        
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 border-b border-gray-700 pb-8">
+            
+            <div>
+                <a href="index.html" class="text-2xl font-bold text-teal-400">SeaTech</a>
+                <p class="text-sm text-gray-400 mt-4 leading-relaxed">
+                    Cổng thông tin kỹ thuật nuôi trồng thủy sản tập trung vào kinh nghiệm và tài liệu dành cho người nuôi tại tỉnh Trà Vinh.
+                </p>
+                <div class="flex space-x-4 mt-4">
+                    <a href="#" class="text-gray-400 hover:text-teal-400 transition">📘</a> <a href="#" class="text-gray-400 hover:text-teal-400 transition">📺</a> <a href="#" class="text-gray-400 hover:text-teal-400 transition">📧</a> </div>
+            </div>
+
+            <div>
+                <h3 class="text-lg font-semibold text-white mb-4 border-b border-teal-500 pb-1">Điều Hướng</h3>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="index.html" class="text-gray-400 hover:text-white transition">Trang Chủ</a></li>
+                    <li><a href="tintuc.html" class="text-gray-400 hover:text-white transition">Tin Tức Cộng Đồng</a></li>
+                    <li><a href="kythuat.html" class="text-gray-400 hover:text-white transition">Thông tin Kỹ Thuật</a></li>
+                    <li><a href="dangtin.html" class="text-gray-400 hover:text-white transition">Đăng Bài/Chia Sẻ</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="text-lg font-semibold text-white mb-4 border-b border-teal-500 pb-1">Tra Cứu Nhanh</h3>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="kythuat-nuoi.html" class="text-gray-400 hover:text-white transition">Kỹ Thuật Nuôi Tôm/Cá</a></li>
+                    <li><a href="benh-thuy-san.html" class="text-gray-400 hover:text-white transition">Phác Đồ Bệnh Thủy Sản</a></li>
+                    <li><a href="tai-lieu-thuy-san.html" class="text-gray-400 hover:text-white transition">Thư Viện Tài Liệu</a></li>
+                    <li><a href="loai-thuy-san.html" class="text-gray-400 hover:text-white transition">Danh Mục Loài</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="text-lg font-semibold text-white mb-4 border-b border-teal-500 pb-1">Liên Hệ</h3>
+                <ul class="space-y-2 text-sm">
+                    <li><span class="text-gray-400">Địa chỉ:</span> <span class="text-white">Trà Vinh, Việt Nam</span></li>
+                    <li><span class="text-gray-400">Email:</span> <a href="mailto:info@tvfishfarm.com" class="text-teal-400 hover:underline">info@tvfishfarm.com</a></li>
+                    <li><span class="text-gray-400">Điện thoại:</span> <span class="text-white">(+84) 9xxyyyyzzz</span></li>
+                </ul>
+            </div>
+
+        </div>
+        
+        <div class="mt-6 text-center text-sm text-gray-500">
+            &copy; 2025 Kỹ Thuật Nuôi Trồng Thủy Sản Trà Vinh. Được phát triển tại <span class="text-teal-400">Trà Vinh</span>.
+        </div>
+    </div>
+</footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+/* =========================================================
+   style.css - KIỂU DÁNG BỔ SUNG CHO TOÀN BỘ TRANG WEB
+   ========================================================= */
+
+/* Thanh cuộn tùy chỉnh (Chỉ hoạt động trên trình duyệt Webkit) */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f1f1; /* Nền nhẹ */
+}
+::-webkit-scrollbar-thumb {
+    background: #0d9488; /* Màu Teal-600 */
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #0f766e; /* Teal đậm hơn khi hover */
+}
+
+/* Định dạng cho nội dung bài viết chi tiết (.prose)
+   Giúp các thẻ HTML cơ bản (h2, p, ul) hiển thị rõ ràng */
+.prose h2 {
+    font-size: 1.5rem; /* text-2xl */
+    font-weight: 700; /* font-bold */
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    color: #1f2937; /* Màu chữ chính */
+    border-bottom: 1px solid #e5e7eb; /* Border nhẹ dưới heading */
+    padding-bottom: 0.5rem;
+}
+
+.prose p {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+    color: #374151; /* Màu chữ đọc */
+}
+
+.prose ul {
+    list-style-type: disc;
+    margin-left: 2rem;
+    margin-bottom: 1rem;
+    padding-left: 0;
+}
+
+/* Hiệu ứng chuyển động mượt mà cho các phần tử có class .transition */
+.transition {
+    transition: all 0.3s ease-in-out;
+}

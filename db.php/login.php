@@ -1,0 +1,36 @@
+<?php
+// db.php/login.php
+include 'db.php';
+header('Content-Type: application/json');
+
+$data = json_decode(file_get_contents('php://input'), true);
+
+if (!isset($data['user']) || !isset($data['password'])) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Vui lòng điền đủ thông tin đăng nhập.']);
+    exit;
+}
+
+$user = $data['user']; 
+$password = $data['password'];
+
+try {
+    // Tìm kiếm user theo email HOẶC username
+    $stmt = $pdo->prepare("SELECT id, username, password_hash FROM users WHERE email = ? OR username = ?");
+    $stmt->execute([$user, $user]);
+    $userRow = $stmt->fetch();
+
+    if ($userRow && password_verify($password, $userRow['password_hash'])) {
+        // Đăng nhập thành công
+        echo json_encode(['success' => true, 'message' => 'Đăng nhập thành công!', 'username' => $userRow['username']]);
+    } else {
+        // Sai thông tin
+        http_response_code(401);
+        echo json_encode(['success' => false, 'message' => 'Tên tài khoản/Email hoặc Mật khẩu không đúng.']);
+    }
+
+} catch (\PDOException $e) {
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => 'Lỗi Server.']);
+}
+?>
