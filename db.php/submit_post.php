@@ -1,5 +1,5 @@
 <?php
-// submit_post.php - Xử lý việc đăng bài và lưu vào CSDL (ĐÃ CẢI TIẾN FILE UPLOAD)
+// submit_post.php - Xử lý việc đăng bài và lưu vào CSDL (CẢI TIẾN DEBUG)
 include 'db.php'; 
 header('Content-Type: application/json');
 
@@ -8,21 +8,30 @@ $title = $_POST['title'] ?? '';
 $content = $_POST['content'] ?? '';
 $category = $_POST['category'] ?? '';
 $author_username = $_POST['author'] ?? ''; 
-$image_url = null; // Khởi tạo image_url
+$image_url = null; 
 
-// Thư mục lưu trữ ảnh (CẦN ĐẢM BẢO THƯ MỤC 'uploads/' TỒN TẠI VÀ CÓ QUYỀN GHI)
+// Thư mục lưu trữ ảnh
 $target_dir = "uploads/"; 
 
-
-// --- LOGIC XỬ LÝ TỆP TIN (CẢI TIẾN) ---
-if (isset($_FILES['post-media']) && $_FILES['post-media']['error'] == UPLOAD_ERR_OK) {
+// --- LOGIC XỬ LÝ TỆP TIN ---
+if (isset($_FILES['post-media']) && $_FILES['post-media']['error'] != UPLOAD_ERR_NO_FILE) {
     
-    // 1. Tạo tên file duy nhất để tránh trùng lặp
+    // Kiểm tra các lỗi upload cơ bản
+    $upload_error = $_FILES['post-media']['error'];
+
+    if ($upload_error != UPLOAD_ERR_OK) {
+        // Trả về mã lỗi upload PHP chi tiết (ví dụ: file quá lớn, lỗi server,...)
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Lỗi Upload File Code: ' . $upload_error . '. Vui lòng kiểm tra dung lượng file.']);
+        exit;
+    }
+    
+    // 1. Tạo tên file duy nhất
     $file_extension = pathinfo($_FILES['post-media']['name'], PATHINFO_EXTENSION);
     $new_file_name = uniqid() . time() . "." . strtolower($file_extension);
     $target_file = $target_dir . $new_file_name;
     
-    // 2. Chỉ cho phép các định dạng ảnh phổ biến (Bảo mật)
+    // 2. Chỉ cho phép các định dạng ảnh phổ biến
     $allowed_types = ['jpg', 'jpeg', 'png', 'gif'];
     if (!in_array(strtolower($file_extension), $allowed_types)) {
         http_response_code(400);
@@ -32,12 +41,11 @@ if (isset($_FILES['post-media']) && $_FILES['post-media']['error'] == UPLOAD_ERR
     
     // 3. Thực hiện di chuyển file
     if (move_uploaded_file($_FILES['post-media']['tmp_name'], $target_file)) {
-        // Lưu URL tương đối của file vào CSDL
         $image_url = $target_file; 
     } else {
-        // Lỗi khi di chuyển file (Thường do thiếu quyền ghi hoặc thư mục không tồn tại)
+        // Lỗi thường do quyền ghi (Permission Denied)
         http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Lỗi Server: Không thể lưu tệp tin đã tải lên. Vui lòng kiểm tra quyền thư mục "' . $target_dir . '".']);
+        echo json_encode(['success' => false, 'message' => 'Lỗi Server: Không thể lưu tệp tin. Vui lòng kiểm tra quyền GHI thư mục "' . $target_dir . '".']);
         exit;
     }
 }
@@ -65,4 +73,4 @@ try {
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'Lỗi Server: Không thể lưu bài viết. Chi tiết: ' . $e->getMessage()]);
 }
-?>
+// KHÔNG CÓ THẺ ĐÓNG PHP ?> Ở ĐÂY

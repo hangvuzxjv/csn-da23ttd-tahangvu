@@ -29,4 +29,3 @@ try {
     echo json_encode(['success' => false, 'message' => 'LỖI KẾT NỐI SERVER/CSDL: ' . $e->getMessage()]);
     exit;
 }
-// KHÔNG CÓ THẺ ĐÓNG ?>
