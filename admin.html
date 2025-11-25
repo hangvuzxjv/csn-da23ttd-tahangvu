@@ -3,41 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang Quản Trị - Duyệt Bài</title>
-    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
+    <title>🛠️ Quản Trị Hệ Thống - Duyệt Bài</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+        .admin-tab.active {
+            border-bottom-color: #f87171; /* Màu Red-400 */
+            color: #b91c1c; /* Màu Red-700 */
+        }
+        /* Custom CSS cho Admin Post List */
+        .admin-post-item {
+            border-left-width: 4px;
+            border-radius: 0.5rem;
+        }
+        .status-pending { border-left-color: #fcd34d; } /* Vàng */
+        .status-approved { border-left-color: #059669; } /* Xanh lá */
+        .status-rejected { border-left-color: #dc2626; } /* Đỏ */
+    </style>
 </head>
 <body class="bg-gray-100">
 
+    <!-- HEADER -->
+    <header class="sticky top-0 z-50 bg-white shadow-md">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <a href="index.html" class="text-xl font-bold text-teal-600">SeaTech</a>
+                <span class="text-sm font-bold text-red-500 hidden md:inline">TRANG QUẢN TRỊ</span>
+            </div>
+            
+            <div id="user-profile" class="relative">
+                <button class="flex items-center space-x-2 text-gray-700 hover:text-red-600" id="user-menu-btn">
+                    <img src="img/avt1.jpg" alt="Avatar" class="w-8 h-8 rounded-full object-cover border-2 border-red-500">
+                    <span class="text-sm font-medium text-red-600">ADMIN</span>
+                </button>
+                <div id="user-menu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden">
+                    <a href="profile.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"> Profile</a>
+                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onclick="logout()"> Đăng Xuất</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
     <main class="container mx-auto px-4 py-10">
-        <h1 class="text-4xl font-extrabold text-red-600 mb-8">🛠️ Trang Quản Trị - Duyệt Bài Viết</h1>
+        <h1 class="text-4xl font-extrabold text-red-600 mb-6">🛠️ Bảng Điều Khiển Quản Trị</h1>
         
-        <div id="auth-check" class="bg-red-200 p-4 rounded-lg text-red-800 font-semibold hidden">
-            Bạn cần đăng nhập với vai trò ADMIN để xem trang này.
+        <div id="auth-check" class="bg-red-200 p-4 rounded-lg text-red-800 font-semibold text-center mb-8 hidden">
+            ❌ BẠN KHÔNG CÓ QUYỀN TRUY CẬP (Chỉ dành cho ADMIN).
         </div>
         
-        <div id="pending-posts-list" class="space-y-6">
+        <div id="admin-tabs" class="flex space-x-4 border-b border-gray-300 mb-8">
+            <div class="admin-tab active" data-tab="pending">Duyệt Bài Viết</div>
+            <div class="admin-tab" data-tab="all">Quản Lý TẤT CẢ Bài Viết</div>
+        </div>
+        
+        <div id="tab-content-pending" class="tab-content space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">Bài Viết Chờ Duyệt</h2>
+            <div id="pending-posts-list">
+                <!-- Nội dung Bài viết Chờ duyệt -->
             </div>
+        </div>
+        
+        <div id="tab-content-all" class="tab-content space-y-6 hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">Tất Cả Bài Viết Đã Đăng</h2>
+            <div id="all-posts-list">
+                <!-- Nội dung Tất cả Bài viết -->
+            </div>
+        </div>
 
     </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-gray-900 text-white mt-12 pt-10 pb-6">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 border-b border-gray-700 pb-8">
+                <div>
+                    <a href="index.html" class="text-2xl font-bold text-teal-400">SeaTech</a>
+                    <p class="text-sm text-gray-400 mt-4 leading-relaxed">Cổng thông tin kỹ thuật nuôi trồng thủy sản...</p>
+                </div>
+                <div><h3 class="text-lg font-semibold text-white mb-4 border-b border-teal-500 pb-1">Điều Hướng</h3><ul class="space-y-2 text-sm"><li><a href="index.html" class="text-gray-400 hover:text-white transition">Trang Chủ</a></li><li><a href="tintuc.html" class="text-gray-400 hover:text-white transition">Tin Tức Cộng Đồng</a></li><li><a href="kythuat.html" class="text-gray-400 hover:text-white transition">Thông tin Kỹ Thuật</a></li><li><a href="dangtin.html" class="text-gray-400 hover:text-white transition">Đăng Bài/Chia Sẻ</a></li></ul></div>
+                <div><h3 class="text-lg font-semibold text-white mb-4 border-b border-teal-500 pb-1">Tra Cứu Nhanh</h3><ul class="space-y-2 text-sm"><li><a href="kythuat-nuoi.html" class="text-gray-400 hover:text-white transition">Kỹ Thuật Nuôi Tôm/Cá</a></li><li><a href="benh-thuy-san.html" class="text-gray-400 hover:text-white transition">Phác Đồ Bệnh Thủy Sản</a></li><li><a href="tai-lieu-thuy-san.html" class="text-gray-400 hover:text-white transition">Thư Viện Tài Liệu</a></li><li><a href="loai-thuy-san.html" class="text-gray-400 hover:text-white transition">Danh Mục Loài</a></li></ul></div>
+                <div><h3 class="text-lg font-semibold text-white mb-4 border-b border-teal-500 pb-1">Liên Hệ</h3><ul class="space-y-2 text-sm"><li><span class="text-gray-400">Địa chỉ:</span> <span class="text-white">Trà Vinh, Việt Nam</span></li><li><span class="text-gray-400">Email:</span> <a href="mailto:info@tvfishfarm.com" class="text-teal-400 hover:underline">info@tvfishfarm.com</a></li><li><span class="text-gray-400">Điện thoại:</span> <span class="text-white">(+84) 9xxyyyyzzz</span></li></ul></div>
+            </div>
+            <div class="mt-6 text-center text-sm text-gray-500">
+                &copy; 2025 Kỹ Thuật Nuôi Trồng Thủy Sản Trà Vinh. Được phát triển tại <span class="text-teal-400">Trà Vinh</span>.
+            </div>
+        </div>
+    </footer>
+
 
     <script src="script.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const userRole = localStorage.getItem('role');
             if (userRole === 'admin') {
-                renderAdminDashboard();
+                renderAdminDashboard(); // Tải tab mặc định: Chờ duyệt
+                initializeAdminTabs();
             } else {
                 document.getElementById('auth-check').classList.remove('hidden');
             }
+            
+            // Khởi tạo Menu User (cần cho header)
+            if (typeof checkLoginStatus !== 'undefined') {
+                 checkLoginStatus(); 
+            }
         });
-        
-        // Thêm các hàm xử lý Admin vào script.js (sẽ hướng dẫn sau)
-        // Lưu ý: Nếu admin.html không có header/footer, hãy tự thêm vào.
-        
-        // HÀM MOCKUP ĐỂ CHUYỂN HƯỚNG VỀ TRANG CHỦ
-        if (typeof checkLoginStatus !== 'undefined') {
-             checkLoginStatus(); 
+
+        function initializeAdminTabs() {
+            const tabs = document.querySelectorAll('.admin-tab');
+            const contents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const target = tab.getAttribute('data-tab');
+
+                    // Ẩn tất cả nội dung, loại bỏ trạng thái active
+                    tabs.forEach(t => t.classList.remove('active'));
+                    contents.forEach(c => c.classList.add('hidden'));
+
+                    // Hiển thị nội dung target, thêm trạng thái active
+                    tab.classList.add('active');
+                    document.getElementById(`tab-content-${target}`).classList.remove('hidden');
+
+                    // Tải dữ liệu cho tab được chọn
+                    if (target === 'all') {
+                        renderAllPostsForAdmin();
+                    } else if (target === 'pending') {
+                        renderAdminDashboard();
+                    }
+                });
+            });
         }
     </script>
 </body>
