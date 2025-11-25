@@ -11,7 +11,7 @@ $author_username = $_POST['author'] ?? '';
 $image_url = null; 
 
 // Thư mục lưu trữ ảnh
-$target_dir = "uploads/"; 
+$target_dir = "../uploads/";
 
 // --- LOGIC XỬ LÝ TỆP TIN ---
 if (isset($_FILES['post-media']) && $_FILES['post-media']['error'] != UPLOAD_ERR_NO_FILE) {
@@ -73,4 +73,3 @@ try {
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'Lỗi Server: Không thể lưu bài viết. Chi tiết: ' . $e->getMessage()]);
 }
-// KHÔNG CÓ THẺ ĐÓNG PHP ?> Ở ĐÂY

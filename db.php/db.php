@@ -1,6 +1,4 @@
-// Nội dung file db.php (Đã bỏ thẻ đóng ?>)
 <?php
-// BẬT BÁO CÁO LỖI PHP MỨC CAO
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
