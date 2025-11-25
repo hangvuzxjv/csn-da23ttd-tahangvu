@@ -112,7 +112,27 @@ function checkLoginStatus() {
     
     // Lưu ý: postCount hiện tại không được cập nhật chính xác từ DB
     const postCount = localStorage.getItem('postCount') || 0; 
-    
+    // Cập nhật thông tin trên trang profile
+if (window.location.pathname.endsWith('profile.html')) {
+    const profileUsernameElement = document.getElementById('profile-username');
+    const profilePostCountElement = document.getElementById('profile-post-count');
+
+    if (profileUsernameElement) {
+         profileUsernameElement.textContent = username; // Sẽ hoạt động
+    }
+
+    if (profilePostCountElement) {
+         profilePostCountElement.textContent = postCount; // Sẽ hoạt động
+    }
+
+    // Cập nhật Email thực tế (Nếu bạn đã lưu email vào localStorage trong login.php)
+    const profileEmailElement = document.getElementById('profile-email');
+    const email = localStorage.getItem('email');
+    if (profileEmailElement && email) {
+        profileEmailElement.textContent = email; 
+    }
+}
+
     if (authButtons && userProfileDiv) {
         if (isLoggedIn) {
             authButtons.classList.add('hidden');
@@ -147,19 +167,7 @@ function checkLoginStatus() {
     
 }
     
-    // THAY THẾ KHỐI TRÊN BẰNG
-    if (window.location.pathname.endsWith('profile.html') && isLoggedIn) {
-    const profileUsernameElement = document.getElementById('profile-username');
-    const profilePostCount = document.getElementById('profile-post-count');
     
-    if (profileUsernameElement) {
-         profileUsernameElement.textContent = username; // Sử dụng biến đã khai báo
-    }
-    
-    if (profilePostCount) {
-         profilePostCount.textContent = postCount; // Sử dụng biến đã khai báo
-    }
-
 // =========================================================
 // CHỨC NĂNG B: XỬ LÝ FORM AUTH
 // =========================================================
@@ -776,99 +784,6 @@ async function handleResetPasswordSubmit(event) {
 }
 
 
-// XỬ LÝ ADMIN 
-
-async function renderAdminDashboard() {
-    const container = document.getElementById('pending-posts-list');
-    if (!container) return;
-    
-    container.innerHTML = '<p class="text-center text-teal-600 py-10">Đang tải bài viết đang chờ duyệt...</p>';
-
-    // Lấy tất cả bài viết đang chờ duyệt
-    const pendingPosts = await fetchPosts({ status: 'pending' });
-
-    if (pendingPosts.length === 0) {
-        container.innerHTML = `<p class="text-center text-gray-500 py-10">Không có bài viết nào đang chờ duyệt. 🎉</p>`;
-        return;
-    }
-
-    const postsHtml = pendingPosts.map(post => {
-        return `
-            <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-yellow-500">
-                <h3 class="text-xl font-bold text-gray-800 mb-2">${post.title}</h3>
-                <p class="text-sm text-gray-600 mb-3">Tác giả: ${post.author_username} | Phân loại: ${post.category}</p>
-                <div class="prose max-w-none text-gray-700 leading-relaxed mb-4 border p-3 rounded-lg bg-gray-50 max-h-40 overflow-y-auto">
-                    ${post.content.replace(/\n/g, '<br>')}
-                </div>
-
-                <div class="mb-4">
-                    <label for="admin-note-${post.id}" class="block text-sm font-medium text-gray-700 mb-1">Phân Tích & Hướng Dẫn (Tùy chọn)</label>
-                    <textarea id="admin-note-${post.id}" rows="3" class="w-full p-2 border rounded-lg focus:ring-teal-500"></textarea>
-                </div>
-
-                <div class="flex justify-end space-x-3">
-                    <button onclick="handleApproval(${post.id}, 'reject')" class="px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition">
-                        ❌ Từ Chối
-                    </button>
-                    <button onclick="handleApproval(${post.id}, 'approve')" class="px-4 py-2 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 transition">
-                        ✅ Phê Duyệt
-                    </button>
-                </div>
-            </div>
-        `;
-    }).join('');
-
-    container.innerHTML = postsHtml;
-}
-
-// Xử lý Phê duyệt/Từ chối bài viết
-async function handleApproval(postId, action) {
-    const adminUsername = localStorage.getItem('username');
-    if (!adminUsername || localStorage.getItem('role') !== 'admin') {
-        alert('Bạn không có quyền thực hiện hành động này.');
-        return;
-    }
-    
-    const adminNote = document.getElementById(`admin-note-${postId}`).value.trim();
-    
-    if (action === 'reject' && !confirm('Bạn có chắc chắn muốn TỪ CHỐI bài viết này không?')) {
-        return;
-    }
-    
-    if (action === 'approve' && !confirm('Bạn có chắc chắn muốn PHÊ DUYỆT bài viết này không?')) {
-        return;
-    }
-
-    const formData = {
-        post_id: postId,
-        action: action,
-        admin_note: adminNote,
-        admin_username: adminUsername
-    };
-    
-    try {
-        const response = await fetch('db.php/approve_post.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData)
-        });
-
-        const result = await response.json();
-
-        if (response.ok && result.success) {
-            alert(result.message);
-            // Tải lại danh sách bài viết sau khi phê duyệt/từ chối
-            renderAdminDashboard(); 
-        } else {
-            alert('Lỗi xử lý: ' + (result.message || 'Lỗi không xác định.'));
-        }
-
-    } catch (error) {
-        console.error('Lỗi kết nối server:', error);
-        alert('Lỗi kết nối server. Vui lòng kiểm tra console log.');
-    }
-}
-
 
 
 
@@ -901,4 +816,3 @@ function initializeCarousel() {
     setInterval(nextSlide, 5000); 
 }
 window.initializeCarousel = initializeCarousel; // Cần thiết để hàm được gọi
-}
