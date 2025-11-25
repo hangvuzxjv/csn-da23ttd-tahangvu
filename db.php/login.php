@@ -16,14 +16,16 @@ $password = $data['password'];
 
 try {
     // Tìm kiếm user theo email HOẶC username
-    $stmt = $pdo->prepare("SELECT id, username, password_hash FROM users WHERE email = ? OR username = ?");
+    $stmt = $pdo->prepare("SELECT id, username, password_hash, role FROM users WHERE email = ? OR username = ?");
     $stmt->execute([$user, $user]);
     $userRow = $stmt->fetch();
 
     if ($userRow && password_verify($password, $userRow['password_hash'])) {
         // Đăng nhập thành công
-        echo json_encode(['success' => true, 'message' => 'Đăng nhập thành công!', 'username' => $userRow['username']]);
-    } else {
+    echo json_encode(['success' => true, 'message' => 'Đăng nhập thành công!', 'username' => $userRow['username'], 'role' => $userRow['role']]);
+   
+    }
+     else {
         // Sai thông tin
         http_response_code(401);
         echo json_encode(['success' => false, 'message' => 'Tên tài khoản/Email hoặc Mật khẩu không đúng.']);

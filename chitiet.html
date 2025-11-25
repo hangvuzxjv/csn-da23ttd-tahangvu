@@ -97,12 +97,11 @@
                 <p>Ngoài ra, bài viết còn đi sâu vào chế độ cho ăn, cách xử lý các tình huống khẩn cấp như biến động thời tiết, và phương pháp thu hoạch hiệu quả.</p>
             </div>
             
-            <div class="mt-8 pt-4 border-t-2 border-dashed border-gray-300 flex items-center justify-end space-x-4">
-                <div class="text-right">
-                    <p class="text-sm text-gray-500">Bài viết được chia sẻ bởi:</p>
-                    <a href="profile.html" class="text-lg font-bold text-teal-600 hover:text-teal-800">hangvuzxjv</a>
-                    <p class="text-xs text-gray-500">Người nuôi có kinh nghiệm tại Trà Vinh</p>
-                </div>
+            <div class="mt-8 p-6 bg-teal-50 border-l-4 border-teal-600 rounded-lg">
+                <h2 class="text-xl font-bold text-teal-700 mb-2">💡 Phân Tích & Hướng Dẫn từ Quản Trị Viên</h2>
+                <p class="text-gray-700">${post.admin_note}</p>
+                <p class="text-xs text-gray-500 mt-2">Được phê duyệt bởi: ${post.approved_by_admin}</p>
+            </div>
                 <a href="profile.html">
                     <img src="img/avt1.jpg" alt="Avatar" class="w-16 h-16 rounded-full border-2 border-teal-500">
                 </a>

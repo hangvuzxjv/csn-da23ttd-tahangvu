@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Quản Trị - Duyệt Bài</title>
+    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-100">
+
+    <main class="container mx-auto px-4 py-10">
+        <h1 class="text-4xl font-extrabold text-red-600 mb-8">🛠️ Trang Quản Trị - Duyệt Bài Viết</h1>
+        
+        <div id="auth-check" class="bg-red-200 p-4 rounded-lg text-red-800 font-semibold hidden">
+            Bạn cần đăng nhập với vai trò ADMIN để xem trang này.
+        </div>
+        
+        <div id="pending-posts-list" class="space-y-6">
+            </div>
+
+    </main>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const userRole = localStorage.getItem('role');
+            if (userRole === 'admin') {
+                renderAdminDashboard();
+            } else {
+                document.getElementById('auth-check').classList.remove('hidden');
+            }
+        });
+        
+        // Thêm các hàm xử lý Admin vào script.js (sẽ hướng dẫn sau)
+        // Lưu ý: Nếu admin.html không có header/footer, hãy tự thêm vào.
+        
+        // HÀM MOCKUP ĐỂ CHUYỂN HƯỚNG VỀ TRANG CHỦ
+        if (typeof checkLoginStatus !== 'undefined') {
+             checkLoginStatus(); 
+        }
+    </script>
+</body>
+</html>
