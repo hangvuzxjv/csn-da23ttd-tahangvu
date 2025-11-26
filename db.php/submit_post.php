@@ -1,13 +1,21 @@
 <?php
 // submit_post.php - Xử lý việc đăng bài và lưu vào CSDL (CẢI TIẾN DEBUG)
-include 'db.php'; 
+include 'db.php';
+include 'session_manager.php';
 header('Content-Type: application/json');
+
+// Yêu cầu đăng nhập
+requireLogin();
 
 // Đọc dữ liệu từ POST/FILES
 $title = $_POST['title'] ?? '';
 $content = $_POST['content'] ?? '';
 $category = $_POST['category'] ?? '';
-$author_username = $_POST['author'] ?? ''; 
+
+// Lấy username từ session thay vì từ POST (BẢO MẬT)
+$currentUser = getCurrentUser();
+$author_username = $currentUser['username'];
+
 $image_url = null; 
 
 // Thư mục lưu trữ ảnh
@@ -44,9 +52,7 @@ if (isset($_FILES['post-media']) && $_FILES['post-media']['error'] != UPLOAD_ERR
     
     // 3. Thực hiện di chuyển file
     if (move_uploaded_file($_FILES['post-media']['tmp_name'], $target_file)) {
-        // <<<< ĐÃ SỬA LỖI ĐƯỜNG DẪN TẠI ĐÂY >>>>
-        // Lưu đường dẫn tương đối để hiển thị trên frontend
-        $image_url = "db.php/uploads/" . $new_file_name;
+       $image_url = $new_file_name;
     } else {
         // Lỗi thường do quyền ghi (Permission Denied)
         http_response_code(500);

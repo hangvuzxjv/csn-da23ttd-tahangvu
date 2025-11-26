@@ -1,0 +1,13 @@
+# Bảo mật thư mục uploads
+# Ngăn chặn directory listing
+Options -Indexes
+
+# Chỉ cho phép truy cập file ảnh
+<FilesMatch "\.(jpg|jpeg|png|gif)$">
+    Require all granted
+</FilesMatch>
+
+# Chặn truy cập các file khác
+<FilesMatch "\.php$">
+    Require all denied
+</FilesMatch>

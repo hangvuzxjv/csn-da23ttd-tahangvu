@@ -1,6 +1,7 @@
 <?php
 // db.php/login.php
 include 'db.php';
+include 'session_manager.php';
 header('Content-Type: application/json');
 
 $data = json_decode(file_get_contents('php://input'), true);
@@ -22,16 +23,16 @@ try {
 
     if ($userRow && password_verify($password, $userRow['password_hash'])) {
         
-        // 2. LẤY SỐ LƯỢNG BÀI VIẾT (MỚI)
-        $postCountStmt = $pdo->prepare("SELECT COUNT(*) FROM posts WHERE author_username = ?");
-        $postCountStmt->execute([$userRow['username']]);
-        $postCount = $postCountStmt->fetchColumn();
+        // 2. Đăng nhập vào session (BẢO MẬT)
+        loginUser($userRow['id'], $userRow['username'], $userRow['email'], $userRow['role']);
         
-        // 3. Đăng nhập thành công và trả về Post Count
-    echo json_encode(['success' => true, 'message' => 'Đăng nhập thành công!', 'username' => $userRow['username'], 'role' => $userRow['role'], 'postCount' => $postCount, 'email' => $userRow['email']]);
+        // 3. Đăng nhập thành công - KHÔNG trả về thông tin nhạy cảm
+        echo json_encode([
+            'success' => true, 
+            'message' => 'Đăng nhập thành công!'
+        ]);
    
-    }
-     else {
+    } else {
         // Sai thông tin
         http_response_code(401);
         echo json_encode(['success' => false, 'message' => 'Tên tài khoản/Email hoặc Mật khẩu không đúng.']);

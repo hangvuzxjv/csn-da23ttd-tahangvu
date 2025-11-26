@@ -3,24 +3,23 @@
 include 'db.php'; 
 header('Content-Type: application/json');
 
+// Include session để kiểm tra quyền
+include 'session_manager.php';
+
 // Đọc tham số tùy chọn từ URL query string
 $statusFilter = $_GET['status'] ?? 'approved';
-$authorFilter = $_GET['author'] ?? null; // Chứa username của người dùng hiện tại khi gọi từ frontend
+$authorFilter = $_GET['author'] ?? null;
 $postId = $_GET['id'] ?? null;
 $limit = $_GET['limit'] ?? null;
 
+// Lấy thông tin user hiện tại (nếu đăng nhập)
+$currentUser = getCurrentUser();
+
 // --- BẢO MẬT: XỬ LÝ YÊU CẦU XEM CHI TIẾT ĐỘC LẬP VÀ BẢO MẬT ---
 if ($postId) {
-    // 1. Lấy vai trò của người dùng hiện tại (nếu đăng nhập)
-    $role = 'user';
-    if ($authorFilter) {
-        $stmtRole = $pdo->prepare("SELECT role FROM users WHERE username = ?");
-        $stmtRole->execute([$authorFilter]);
-        $userRow = $stmtRole->fetch();
-        if ($userRow) {
-            $role = $userRow['role'];
-        }
-    }
+    // 1. Lấy vai trò từ session
+    $role = $currentUser ? $currentUser['role'] : 'user';
+    $loggedInUsername = $currentUser ? $currentUser['username'] : null;
 
     // 2. Lấy bài viết dựa trên ID, bao gồm image_url (Đã cập nhật cho tính năng tiếp theo)
     $stmtPost = $pdo->prepare("SELECT id, author_username, title, content, category, created_at, status, admin_note, approved_by_admin, image_url FROM posts WHERE id = ?");
@@ -34,7 +33,7 @@ if ($postId) {
     }
 
     // 3. Kiểm tra quyền truy cập
-    $isAuthor = $post['author_username'] === $authorFilter;
+    $isAuthor = $post['author_username'] === $loggedInUsername;
     $isAdmin = $role === 'admin';
     $isApproved = $post['status'] === 'approved';
 
@@ -57,8 +56,19 @@ $params = [];
 
 // Lọc theo tác giả (cho trang profile) - Logic danh sách
 if ($authorFilter) {
-    $sql .= " AND author_username = ?";
-    $params[] = $authorFilter;
+    // Nếu author='me', lấy từ session
+    if ($authorFilter === 'me') {
+        if (!$currentUser) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'Bạn cần đăng nhập.']);
+            exit;
+        }
+        $sql .= " AND author_username = ?";
+        $params[] = $currentUser['username'];
+    } else {
+        $sql .= " AND author_username = ?";
+        $params[] = $authorFilter;
+    }
     
     // LOGIC FIX LỖI: Nếu lọc theo Tác giả VÀ status là 'all' thì không cần thêm status vào mệnh đề WHERE
     if ($statusFilter !== 'all') {

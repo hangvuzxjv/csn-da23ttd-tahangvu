@@ -1,32 +1,29 @@
 <?php
 // db.php/approve_post.php - Xử lý phê duyệt/từ chối bài viết
-include 'db.php'; 
+include 'db.php';
+include 'session_manager.php';
 header('Content-Type: application/json');
+
+// Yêu cầu quyền admin
+requireAdmin();
 
 $data = json_decode(file_get_contents('php://input'), true);
 
 $postId = $data['post_id'] ?? null;
 $action = $data['action'] ?? ''; // 'approve' hoặc 'reject'
 $adminNote = $data['admin_note'] ?? null;
-$adminUsername = $data['admin_username'] ?? ''; // Lấy từ phiên đăng nhập Admin
 
-if (!$postId || empty($action) || empty($adminUsername)) {
+// Lấy username từ session (BẢO MẬT)
+$currentUser = getCurrentUser();
+$adminUsername = $currentUser['username'];
+
+if (!$postId || empty($action)) {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Thiếu thông tin cần thiết.']);
     exit;
 }
 
 try {
-    // 1. KIỂM TRA QUYỀN ADMIN (Rất quan trọng)
-    $stmt = $pdo->prepare("SELECT role FROM users WHERE username = ?");
-    $stmt->execute([$adminUsername]);
-    $user = $stmt->fetch();
-
-    if (!$user || $user['role'] !== 'admin') {
-        http_response_code(403);
-        echo json_encode(['success' => false, 'message' => 'Bạn không có quyền thực hiện hành động này.']);
-        exit;
-    }
     
     $newStatus = ($action === 'approve') ? 'approved' : 'rejected';
     $message = ($action === 'approve') ? 'Bài viết đã được phê duyệt.' : 'Bài viết đã bị từ chối.';

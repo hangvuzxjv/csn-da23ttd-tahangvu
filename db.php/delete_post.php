@@ -1,17 +1,24 @@
 <?php
 // db.php/delete_post.php - Xử lý xóa bài viết
-include 'db.php'; 
+include 'db.php';
+include 'session_manager.php';
 header('Content-Type: application/json');
+
+// Yêu cầu đăng nhập
+requireLogin();
 
 $data = json_decode(file_get_contents('php://input'), true);
 
 $postId = $data['post_id'] ?? null;
-$username = $data['username'] ?? ''; // Tác giả hoặc Admin
-$role = $data['role'] ?? 'user'; // Vai trò
 
-if (!$postId || empty($username)) {
+// Lấy thông tin từ session (BẢO MẬT)
+$currentUser = getCurrentUser();
+$username = $currentUser['username'];
+$role = $currentUser['role'];
+
+if (!$postId) {
     http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Thiếu thông tin cần thiết (ID bài viết hoặc Tên người dùng).']);
+    echo json_encode(['success' => false, 'message' => 'Thiếu thông tin cần thiết (ID bài viết).']);
     exit;
 }
 

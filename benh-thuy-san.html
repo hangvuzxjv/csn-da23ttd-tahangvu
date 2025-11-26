@@ -9,6 +9,52 @@
 </head>
 <body class="bg-gray-50">
 
+    <header class="sticky top-0 z-50 bg-white shadow-md">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <a href="index.html" class="flex items-center space-x-3 hover:opacity-90 transition">
+                    <img src="img/logo.png" alt="Logo" class="h-10 w-10">
+                    <span class="text-2xl font-bold text-teal-600">Thủy Sản</span>
+                </a>
+            </div>
+
+            <nav class="hidden lg:flex space-x-8 text-base font-medium">
+                <a href="index.html" class="text-gray-700 hover:text-teal-600 transition">Trang Chủ</a>
+                <a href="tintuc.html" class="text-gray-700 hover:text-teal-600 transition">Tin Tức</a>
+                <a href="kythuat.html" class="text-gray-700 hover:text-teal-600 transition">Thông tin/Kỹ Thuật</a>
+                <a href="dangtin.html" class="text-gray-700 hover:text-teal-600 transition">Đăng Tin</a>
+            </nav>
+
+            <div class="flex items-center space-x-4">
+                <div id="auth-buttons">
+                    <a href="dangnhap.html" class="text-sm font-medium text-gray-700 hover:text-teal-600 transition">Đăng Nhập</a>
+                    <a href="dangky.html" class="ml-2 px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-full hover:bg-teal-700 transition">Đăng Ký</a>
+                </div>
+
+                <div id="user-profile" class="hidden relative">
+                    <button class="flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-slate-700 to-slate-800 text-white rounded-full border-2 border-teal-500 shadow-md hover:shadow-lg hover:border-teal-400 transition" id="user-menu-btn">
+                        <div class="w-8 h-8 bg-teal-500 rounded-full flex items-center justify-center"><span class="text-white text-sm font-bold">U</span></div>
+                        <span class="text-sm font-bold">user_tv</span>
+                    </button>
+                    <div id="user-menu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden">
+                        <a href="profile.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onclick="logout()">Đăng Xuất</a>
+                    </div>
+                </div>
+
+                <button id="mobile-menu-toggle" class="lg:hidden text-gray-200 hover:text-teal-300 text-2xl">☰</button>
+            </div>
+        </div>
+
+        <div id="mobile-menu" class="lg:hidden bg-white border-t border-gray-200 hidden">
+            <nav class="flex flex-col space-y-2 p-4 text-sm font-medium">
+                <a href="index.html" class="text-gray-700 hover:text-teal-600 transition">Trang Chủ</a>
+                <a href="tintuc.html" class="text-gray-700 hover:text-teal-600 transition">Tin Tức</a>
+                <a href="kythuat.html" class="text-gray-700 hover:text-teal-600 transition">Thông tin/Kỹ Thuật</a>
+            </nav>
+        </div>
+    </header>
+
     <main class="container mx-auto px-4 py-10">
         <h1 class="text-4xl font-extrabold text-gray-800 mb-2">🦠 Bệnh Thủy Sản & Phác Đồ Phòng Trị</h1>
         <p class="text-gray-600 mb-8">Tra cứu các loại bệnh phổ biến trên thủy sản tại Trà Vinh, dấu hiệu nhận biết và biện pháp can thiệp kịp thời.</p>
@@ -50,7 +96,7 @@
                             <span class="text-xs font-semibold text-red-600 bg-red-100 px-2 py-0.5 rounded">Tôm | Virus</span>
                             <h3 class="text-2xl font-bold text-gray-800 mt-1 mb-2 hover:text-red-600"><a href="chitiet-benh-dom-trang.html">Bệnh Đốm Trắng (WSD)</a></h3>
                         </div>
-                        <span class="text-sm text-gray-500">Cập nhật: 01/11/2025</span>
+                        <span class="text-sm text-gray-400">Cập nhật: 01/11/2025</span>
                     </div>
                     <p class="text-gray-600 line-clamp-3 text-sm mt-2">Là bệnh nguy hiểm nhất, gây thiệt hại nặng nề. Bài viết mô tả chi tiết dấu hiệu nhận biết (đốm trắng trên vỏ), tốc độ lây lan và các biện pháp khẩn cấp...</p>
                     <a href="chitiet-benh-dom-trang.html" class="mt-3 inline-block text-red-600 font-medium hover:underline text-sm">Xem Phác Đồ Phòng Trị →</a>
@@ -62,7 +108,7 @@
                             <span class="text-xs font-semibold text-yellow-600 bg-yellow-100 px-2 py-0.5 rounded">Tôm | Vi Khuẩn</span>
                             <h3 class="text-2xl font-bold text-gray-800 mt-1 mb-2 hover:text-yellow-600"><a href="chitiet-benh-gan-tuy.html">Hoại Tử Gan Tụy Cấp (AHPND/EMS)</a></h3>
                         </div>
-                        <span class="text-sm text-gray-500">Cập nhật: 25/10/2025</span>
+                        <span class="text-sm text-gray-400">Cập nhật: 25/10/2025</span>
                     </div>
                     <p class="text-gray-600 line-clamp-3 text-sm mt-2">Mô tả dấu hiệu tôm bỏ ăn, gan tụy teo, nhạt màu. Cung cấp các biện pháp phòng ngừa bằng men vi sinh và kháng sinh đặc trị (khi được phép)...</p>
                     <a href="chitiet-benh-gan-tuy.html" class="mt-3 inline-block text-red-600 font-medium hover:underline text-sm">Xem Phác Đồ Phòng Trị →</a>
@@ -74,7 +120,7 @@
                             <span class="text-xs font-semibold text-blue-600 bg-blue-100 px-2 py-0.5 rounded">Cá | Ký Sinh</span>
                             <h3 class="text-2xl font-bold text-gray-800 mt-1 mb-2 hover:text-blue-600"><a href="chitiet-benh-lo-loet.html">Bệnh Lở Loét (EUS) trên Cá Tra</a></h3>
                         </div>
-                        <span class="text-sm text-gray-500">Cập nhật: 15/10/2025</span>
+                        <span class="text-sm text-gray-400">Cập nhật: 15/10/2025</span>
                     </div>
                     <p class="text-gray-600 line-clamp-3 text-sm mt-2">Hướng dẫn nhận biết vết loét, xuất huyết trên thân cá. Các biện pháp cải tạo môi trường và sử dụng hóa chất an toàn để điều trị bệnh EUS...</p>
                     <a href="chitiet-benh-lo-loet.html" class="mt-3 inline-block text-red-600 font-medium hover:underline text-sm">Xem Phác Đồ Phòng Trị →</a>
@@ -90,52 +136,52 @@
             </div>
         </div>
     </main>
-    <footer class="bg-gray-900 text-white mt-12 pt-10 pb-6">
+    <footer class="bg-gradient-to-r from-slate-800 to-slate-900 text-white mt-12 pt-10 pb-6">
     <div class="container mx-auto px-4">
         
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 border-b border-gray-700 pb-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 border-b border-slate-700 pb-8">
             
             <div>
-                <a href="index.html" class="text-2xl font-bold text-teal-400">SeaTech</a>
-                <p class="text-sm text-gray-400 mt-4 leading-relaxed">
+                <a href="index.html" class="flex items-center space-x-2"><img src="img/logo.png" alt="Logo" class="h-8 w-8"><span class="text-2xl font-bold text-teal-400">Thủy Sản</span></a>
+                <p class="text-sm text-white mt-4 leading-relaxed">
                     Cổng thông tin kỹ thuật nuôi trồng thủy sản tập trung vào kinh nghiệm và tài liệu dành cho người nuôi tại tỉnh Trà Vinh.
                 </p>
                 <div class="flex space-x-4 mt-4">
-                    <a href="#" class="text-gray-400 hover:text-teal-400 transition">📘</a> <a href="#" class="text-gray-400 hover:text-teal-400 transition">📺</a> <a href="#" class="text-gray-400 hover:text-teal-400 transition">📧</a> </div>
+                    <a href="#" class="text-white hover:text-teal-400 transition">📘</a> <a href="#" class="text-white hover:text-teal-400 transition">📺</a> <a href="#" class="text-white hover:text-teal-400 transition">📧</a> </div>
             </div>
 
             <div>
                 <h3 class="text-lg font-semibold text-white mb-4 border-b border-teal-500 pb-1">Điều Hướng</h3>
                 <ul class="space-y-2 text-sm">
-                    <li><a href="index.html" class="text-gray-400 hover:text-white transition">Trang Chủ</a></li>
-                    <li><a href="tintuc.html" class="text-gray-400 hover:text-white transition">Tin Tức Cộng Đồng</a></li>
-                    <li><a href="kythuat.html" class="text-gray-400 hover:text-white transition">Thông tin Kỹ Thuật</a></li>
-                    <li><a href="dangtin.html" class="text-gray-400 hover:text-white transition">Đăng Bài/Chia Sẻ</a></li>
+                    <li><a href="index.html" class="text-white hover:text-white transition">Trang Chủ</a></li>
+                    <li><a href="tintuc.html" class="text-white hover:text-white transition">Tin Tức Cộng Đồng</a></li>
+                    <li><a href="kythuat.html" class="text-white hover:text-white transition">Thông tin Kỹ Thuật</a></li>
+                    <li><a href="dangtin.html" class="text-white hover:text-white transition">Đăng Bài/Chia Sẻ</a></li>
                 </ul>
             </div>
 
             <div>
                 <h3 class="text-lg font-semibold text-white mb-4 border-b border-teal-500 pb-1">Tra Cứu Nhanh</h3>
                 <ul class="space-y-2 text-sm">
-                    <li><a href="kythuat-nuoi.html" class="text-gray-400 hover:text-white transition">Kỹ Thuật Nuôi Tôm/Cá</a></li>
-                    <li><a href="benh-thuy-san.html" class="text-gray-400 hover:text-white transition">Phác Đồ Bệnh Thủy Sản</a></li>
-                    <li><a href="tai-lieu-thuy-san.html" class="text-gray-400 hover:text-white transition">Thư Viện Tài Liệu</a></li>
-                    <li><a href="loai-thuy-san.html" class="text-gray-400 hover:text-white transition">Danh Mục Loài</a></li>
+                    <li><a href="kythuat-nuoi.html" class="text-white hover:text-white transition">Kỹ Thuật Nuôi Tôm/Cá</a></li>
+                    <li><a href="benh-thuy-san.html" class="text-white hover:text-white transition">Phác Đồ Bệnh Thủy Sản</a></li>
+                    <li><a href="tai-lieu-thuy-san.html" class="text-white hover:text-white transition">Thư Viện Tài Liệu</a></li>
+                    <li><a href="loai-thuy-san.html" class="text-white hover:text-white transition">Danh Mục Loài</a></li>
                 </ul>
             </div>
 
             <div>
                 <h3 class="text-lg font-semibold text-white mb-4 border-b border-teal-500 pb-1">Liên Hệ</h3>
                 <ul class="space-y-2 text-sm">
-                    <li><span class="text-gray-400">Địa chỉ:</span> <span class="text-white">Trà Vinh, Việt Nam</span></li>
-                    <li><span class="text-gray-400">Email:</span> <a href="mailto:info@tvfishfarm.com" class="text-teal-400 hover:underline">info@tvfishfarm.com</a></li>
-                    <li><span class="text-gray-400">Điện thoại:</span> <span class="text-white">(+84) 9xxyyyyzzz</span></li>
+                    <li><span class="text-white">Địa chỉ:</span> <span class="text-white">Trà Vinh, Việt Nam</span></li>
+                    <li><span class="text-white">Email:</span> <a href="mailto:info@tvfishfarm.com" class="text-teal-400 hover:underline">info@tvfishfarm.com</a></li>
+                    <li><span class="text-white">Điện thoại:</span> <span class="text-white">(+84) 9xxyyyyzzz</span></li>
                 </ul>
             </div>
 
         </div>
         
-        <div class="mt-6 text-center text-sm text-gray-500">
+        <div class="mt-6 text-center text-sm text-gray-400">
             &copy; 2025 Kỹ Thuật Nuôi Trồng Thủy Sản Trà Vinh. Được phát triển tại <span class="text-teal-400">Trà Vinh</span>.
         </div>
     </div>

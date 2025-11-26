@@ -5,27 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🛠️ Quản Trị Hệ Thống - Duyệt Bài</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="config.js"></script>
     <link rel="stylesheet" href="style.css">
     <script>
-        // Kiểm tra ngay khi tải trang: Nếu chưa đăng nhập HOẶC không phải Admin, chuyển hướng
-        const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-        const userRole = localStorage.getItem('role');
-        
-        if (!isLoggedIn) {
-             // Chuyển hướng người dùng chưa đăng nhập về trang đăng nhập
-             alert('Vui lòng đăng nhập để truy cập trang quản trị.');
-             window.location.href = 'dangnhap.html';
-        } else if (userRole !== 'admin') {
-             // Giả lập hiển thị thông báo lỗi ngay lập tức
-             document.addEventListener('DOMContentLoaded', () => {
-                 const authCheck = document.getElementById('auth-check');
-                 if (authCheck) {
-                     authCheck.classList.remove('hidden');
-                     authCheck.textContent = '❌ BẠN KHÔNG CÓ QUYỀN TRUY CẬP (Chỉ dành cho ADMIN).';
-                 }
-             });
-             // Có thể chọn chặn JS sau DOMContentLoaded để ngăn tải dữ liệu.
+        // Kiểm tra quyền admin qua session
+        async function checkAdminAccess() {
+            try {
+                const url = window.apiUrl ? apiUrl('db.php/check_session.php') : '/Project/db.php/check_session.php';
+                const response = await fetch(url);
+                const result = await response.json();
+                
+                if (!result.isLoggedIn) {
+                    alert('Vui lòng đăng nhập để truy cập trang quản trị.');
+                    window.location.href = 'dangnhap.html';
+                    return false;
+                } else if (result.role !== 'admin') {
+                    const authCheck = document.getElementById('auth-check');
+                    if (authCheck) {
+                        authCheck.classList.remove('hidden');
+                        authCheck.textContent = '❌ BẠN KHÔNG CÓ QUYỀN TRUY CẬP (Chỉ dành cho ADMIN).';
+                    }
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                console.error('Lỗi kiểm tra quyền:', error);
+                alert('Lỗi kết nối server.');
+                window.location.href = 'index.html';
+                return false;
+            }
         }
+        
+        // Gọi ngay khi load trang
+        checkAdminAccess();
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -35,7 +47,7 @@
             font-weight: 600;
             border-bottom: 3px solid transparent;
             transition: all 0.2s;
-            color: #6b7280; /* text-gray-500 */
+            color: #6b7280; /* text-gray-400 */
         }
         .admin-tab.active {
             border-bottom-color: #ef4444; /* Màu Red-500 */
@@ -59,9 +71,9 @@
 
     <!-- HEADER -->
     <header class="sticky top-0 z-50 bg-white shadow-md">
-        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
             <div class="flex items-center space-x-4">
-                <a href="index.html" class="text-xl font-bold text-teal-600">SeaTech</a>
+                <a href="index.html" class="flex items-center space-x-3 hover:opacity-90 transition"><img src="img/logo.png" alt="Logo" class="h-10 w-10"><span class="text-2xl font-bold text-teal-600">Thủy Sản</span></a>
                 <span class="text-sm font-bold text-red-500 hidden md:inline">TRANG QUẢN TRỊ</span>
             </div>
             
@@ -107,18 +119,18 @@
     </main>
 
     <!-- FOOTER -->
-    <footer class="bg-gray-900 text-white mt-12 pt-10 pb-6">
+    <footer class="bg-gradient-to-r from-slate-800 to-slate-900 text-white mt-12 pt-10 pb-6">
         <div class="container mx-auto px-4">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 border-b border-gray-700 pb-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 border-b border-slate-700 pb-8">
                 <div>
-                    <a href="index.html" class="text-2xl font-bold text-teal-400">SeaTech</a>
-                    <p class="text-sm text-gray-400 mt-4 leading-relaxed">Cổng thông tin kỹ thuật nuôi trồng thủy sản...</p>
+                    <a href="index.html" class="flex items-center space-x-2"><img src="img/logo.png" alt="Logo" class="h-8 w-8"><span class="text-2xl font-bold text-teal-400">Thủy Sản</span></a>
+                    <p class="text-sm text-white mt-4 leading-relaxed">Cổng thông tin kỹ thuật nuôi trồng thủy sản...</p>
                 </div>
-                <div><h3 class="text-lg font-semibold text-white mb-4 border-b border-teal-500 pb-1">Điều Hướng</h3><ul class="space-y-2 text-sm"><li><a href="index.html" class="text-gray-400 hover:text-white transition">Trang Chủ</a></li><li><a href="tintuc.html" class="text-gray-400 hover:text-white transition">Tin Tức Cộng Đồng</a></li><li><a href="kythuat.html" class="text-gray-400 hover:text-white transition">Thông tin Kỹ Thuật</a></li><li><a href="dangtin.html" class="text-gray-400 hover:text-white transition">Đăng Bài/Chia Sẻ</a></li></ul></div>
-                <div><h3 class="text-lg font-semibold text-white mb-4 border-b border-teal-500 pb-1">Tra Cứu Nhanh</h3><ul class="space-y-2 text-sm"><li><a href="kythuat-nuoi.html" class="text-gray-400 hover:text-white transition">Kỹ Thuật Nuôi Tôm/Cá</a></li><li><a href="benh-thuy-san.html" class="text-gray-400 hover:text-white transition">Phác Đồ Bệnh Thủy Sản</a></li><li><a href="tai-lieu-thuy-san.html" class="text-gray-400 hover:text-white transition">Thư Viện Tài Liệu</a></li><li><a href="loai-thuy-san.html" class="text-gray-400 hover:text-white transition">Danh Mục Loài</a></li></ul></div>
-                <div><h3 class="text-lg font-semibold text-white mb-4 border-b border-teal-500 pb-1">Liên Hệ</h3><ul class="space-y-2 text-sm"><li><span class="text-gray-400">Địa chỉ:</span> <span class="text-white">Trà Vinh, Việt Nam</span></li><li><span class="text-gray-400">Email:</span> <a href="mailto:info@tvfishfarm.com" class="text-teal-400 hover:underline">info@tvfishfarm.com</a></li><li><span class="text-gray-400">Điện thoại:</span> <span class="text-white">(+84) 9xxyyyyzzz</span></li></ul></div>
+                <div><h3 class="text-lg font-semibold text-white mb-4 border-b border-teal-500 pb-1">Điều Hướng</h3><ul class="space-y-2 text-sm"><li><a href="index.html" class="text-white hover:text-white transition">Trang Chủ</a></li><li><a href="tintuc.html" class="text-white hover:text-white transition">Tin Tức Cộng Đồng</a></li><li><a href="kythuat.html" class="text-white hover:text-white transition">Thông tin Kỹ Thuật</a></li><li><a href="dangtin.html" class="text-white hover:text-white transition">Đăng Bài/Chia Sẻ</a></li></ul></div>
+                <div><h3 class="text-lg font-semibold text-white mb-4 border-b border-teal-500 pb-1">Tra Cứu Nhanh</h3><ul class="space-y-2 text-sm"><li><a href="kythuat-nuoi.html" class="text-white hover:text-white transition">Kỹ Thuật Nuôi Tôm/Cá</a></li><li><a href="benh-thuy-san.html" class="text-white hover:text-white transition">Phác Đồ Bệnh Thủy Sản</a></li><li><a href="tai-lieu-thuy-san.html" class="text-white hover:text-white transition">Thư Viện Tài Liệu</a></li><li><a href="loai-thuy-san.html" class="text-white hover:text-white transition">Danh Mục Loài</a></li></ul></div>
+                <div><h3 class="text-lg font-semibold text-white mb-4 border-b border-teal-500 pb-1">Liên Hệ</h3><ul class="space-y-2 text-sm"><li><span class="text-white">Địa chỉ:</span> <span class="text-white">Trà Vinh, Việt Nam</span></li><li><span class="text-white">Email:</span> <a href="mailto:info@tvfishfarm.com" class="text-teal-400 hover:underline">info@tvfishfarm.com</a></li><li><span class="text-white">Điện thoại:</span> <span class="text-white">(+84) 9xxyyyyzzz</span></li></ul></div>
             </div>
-            <div class="mt-6 text-center text-sm text-gray-500">
+            <div class="mt-6 text-center text-sm text-gray-400">
                 &copy; 2025 Kỹ Thuật Nuôi Trồng Thủy Sản Trà Vinh. Được phát triển tại <span class="text-teal-400">Trà Vinh</span>.
             </div>
         </div>
@@ -127,13 +139,13 @@
 
     <script src="script.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const userRole = localStorage.getItem('role');
-            if (userRole === 'admin') {
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Kiểm tra quyền admin
+            const hasAccess = await checkAdminAccess();
+            
+            if (hasAccess) {
                 renderAdminDashboard(); // Tải tab mặc định: Chờ duyệt
                 initializeAdminTabs();
-            } else {
-                document.getElementById('auth-check').classList.remove('hidden');
             }
             
             // Khởi tạo Menu User (cần cho header)

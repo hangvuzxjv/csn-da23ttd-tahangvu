@@ -35,17 +35,28 @@ try {
     $stmt = $pdo->prepare("UPDATE users SET reset_token = ?, token_expiry = ? WHERE id = ?");
     $stmt->execute([$token, $expires, $user['id']]);
 
-    // 4. MÔ PHỎNG: Gửi Email cho người dùng
+    // 4. Gửi Email cho người dùng
+    require_once 'send_email.php';
     
-    // Ghi lại URL Reset Password mà người dùng sẽ nhận được (Dành cho Localhost)
-    // Bạn cần thay đổi 'http://localhost/Project/reset_password.html' cho phù hợp với dự án của mình
-    $resetLink = "http://localhost/ten_thu_muc_du_an/reset_password.html?token=" . $token;
+    $emailResult = sendPasswordResetEmail($email, $user['username'], $token);
     
-    // Nếu muốn tiếp tục ghi log mà không làm hỏng JSON, dùng error_log:
-    error_log("Link đặt lại mật khẩu cho " . $user['username'] . ": " . $resetLink);
-    
-    // 5. Trả về phản hồi thành công
-    echo json_encode(['success' => true, 'message' => 'Nếu email của bạn tồn tại, một liên kết đặt lại mật khẩu đã được gửi đến hộp thư của bạn.']);
+    if ($emailResult['success']) {
+        // Email gửi thành công
+        echo json_encode([
+            'success' => true, 
+            'message' => 'Một liên kết đặt lại mật khẩu đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư.'
+        ]);
+    } else {
+        // Lỗi gửi email nhưng vẫn log link để test
+        error_log("Link đặt lại mật khẩu cho " . $user['username'] . ": " . SITE_URL . "/reset_password.html?token=" . $token);
+        error_log("Lỗi gửi email: " . $emailResult['message']);
+        
+        // Vẫn trả về success để không tiết lộ lỗi
+        echo json_encode([
+            'success' => true, 
+            'message' => 'Nếu email của bạn tồn tại, một liên kết đặt lại mật khẩu đã được gửi đến hộp thư của bạn.'
+        ]);
+    }
 
 } catch (\PDOException $e) {
     http_response_code(500);

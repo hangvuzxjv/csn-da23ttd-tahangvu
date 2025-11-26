@@ -2,9 +2,8 @@
 // script.js - SCRIPT VẬN HÀNH TOÀN TRANG (FRONTEND HOÀN CHỈNH)
 // =========================================================
 
-// Hằng số chứa tiền tố thư mục cần thiết để truy cập ảnh công khai
-// Dựa trên cấu trúc file: db.php/uploads/
-const PUBLIC_UPLOAD_PREFIX = 'db.php/'; 
+
+    //const PUBLIC_UPLOAD_PREFIX = 'db.php/'; 
 
 document.addEventListener('DOMContentLoaded', () => {
     // 1. KHỞI TẠO CÁC PHẦN TỬ CHUNG
@@ -26,10 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (postForm) {
         postForm.addEventListener('submit', handleSubmitPost); 
     }
-    const forgotPasswordForm = document.getElementById('forgot-password-form');
-    if (forgotPasswordForm) {
-        forgotPasswordForm.addEventListener('submit', handleForgotPasswordSubmit);
-    }
+    // Forgot password form đã được xử lý ở phần SMS bên dưới
     // Thêm lắng nghe cho form reset password
     const resetPasswordForm = document.getElementById('reset-password-form');
     if (resetPasswordForm) {
@@ -145,62 +141,95 @@ function performSearch() {
 }
 window.performSearch = performSearch; 
 
-// TRONG script.js, HÀM checkLoginStatus (Đã sửa)
-function checkLoginStatus() {
+// TRONG script.js, HÀM checkLoginStatus (ĐÃ SỬA - DÙNG SESSION)
+async function checkLoginStatus() {
     const authButtons = document.getElementById('auth-buttons');
     const userProfileDiv = document.getElementById('user-profile');
 
-    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    const username = localStorage.getItem('username') || 'Người Dùng';
-    const userRole = localStorage.getItem('role') || 'user'; // LẤY ROLE MỚI
-    
-    // LẤY POST COUNT TỪ LOCALSTORAGE (Đã được cập nhật trong handleLoginSubmit và renderMyPosts)
-    const postCount = localStorage.getItem('postCount') || 0; 
-    
-    // Cập nhật thông tin trên trang profile
-    // FIX: Đã thêm kiểm tra tồn tại của các phần tử HTML để tránh TypeError trên các trang khác
-    if (window.location.pathname.endsWith('profile.html')) {
-        const profileUsernameElement = document.getElementById('profile-username');
-        const profilePostCountElement = document.getElementById('profile-post-count');
-        const profileEmailElement = document.getElementById('profile-email');
+    if (!authButtons || !userProfileDiv) return;
 
-        if (profileUsernameElement) {
-             profileUsernameElement.textContent = username; 
+    try {
+        // Gọi API kiểm tra session
+        const response = await fetch(apiUrl('db.php/check_session.php'));
+        const result = await response.json();
+        
+        if (!result.success) {
+            // Nếu API lỗi, hiển thị nút đăng nhập
+            authButtons.classList.remove('hidden');
+            userProfileDiv.classList.add('hidden');
+            return;
         }
 
-        if (profilePostCountElement) {
-             profilePostCountElement.textContent = postCount; 
+        const isLoggedIn = result.isLoggedIn;
+        const username = result.username || 'Người Dùng';
+        const userRole = result.role || 'user';
+        const postCount = result.postCount || 0;
+        
+        console.log('Login status:', { isLoggedIn, username, userRole, postCount }); 
+        
+        // Cập nhật thông tin trên trang profile
+        if (window.location.pathname.endsWith('profile.html')) {
+            const profileUsernameElement = document.getElementById('profile-username');
+            const profilePostCountElement = document.getElementById('profile-post-count');
+            const profileEmailElement = document.getElementById('profile-email');
+            const profileAvatarElement = document.getElementById('profile-avatar');
+
+            // Hiển thị username (tên đăng nhập)
+            if (profileUsernameElement) {
+                profileUsernameElement.textContent = username; 
+            }
+
+            if (profilePostCountElement) {
+                profilePostCountElement.textContent = postCount; 
+            }
+
+            if (profileEmailElement && result.email) {
+                profileEmailElement.textContent = result.email; 
+            }
+            
+            // Hiển thị email chi tiết
+            const profileEmailDetailElement = document.getElementById('profile-email-detail');
+            if (profileEmailDetailElement && result.email) {
+                profileEmailDetailElement.textContent = result.email;
+            }
+
+            // Hiển thị số điện thoại
+            const profilePhoneElement = document.getElementById('profile-phone');
+            if (profilePhoneElement) {
+                profilePhoneElement.textContent = result.phone || 'Chưa cập nhật';
+            }
         }
 
-        const email = localStorage.getItem('email');
-        if (profileEmailElement && email) {
-            profileEmailElement.textContent = email; 
-        }
-    }
-
-    if (authButtons && userProfileDiv) {
         if (isLoggedIn) {
             authButtons.classList.add('hidden');
             userProfileDiv.classList.remove('hidden');
             
-            userProfileDiv.querySelector('span').textContent = username;
+            // Cập nhật tên user trong header
+            const userButton = userProfileDiv.querySelector('#user-menu-btn');
+            if (userButton) {
+                // Tìm span chứa text "user_tv" hoặc span cuối cùng
+                const spans = userButton.querySelectorAll('span');
+                if (spans.length >= 2) {
+                    // Span thứ 2 là tên user (span đầu là chữ "U")
+                    spans[1].textContent = username;
+                    console.log('Updated username to:', username);
+                }
+            }
             
-            // FIX: Cập nhật số bài viết trên menu
+            // Cập nhật số bài viết trên menu
             const profileLink = userProfileDiv.querySelector('a[href="profile.html"]');
             if(profileLink) {
-                 profileLink.textContent = `👤 Profile (${postCount} bài)`;
+                profileLink.textContent = `👤 Profile (${postCount} bài)`;
             }
 
-            // LOGIC MỚI: THÊM NÚT ADMIN CHO ADMIN
+            // THÊM NÚT ADMIN CHO ADMIN
             const userMenu = document.getElementById('user-menu');
             if (userRole === 'admin' && userMenu) {
-                // Kiểm tra nếu nút admin chưa có thì thêm vào
                 if (!userMenu.querySelector('a[href="admin.html"]')) {
                     const adminLink = document.createElement('a');
                     adminLink.href = 'admin.html';
                     adminLink.className = 'block px-4 py-2 text-sm font-bold text-red-600 hover:bg-red-50';
                     adminLink.textContent = '🛠️ Quản Trị Bài Viết';
-                    // Thêm vào vị trí đầu tiên
                     userMenu.insertBefore(adminLink, userMenu.firstChild); 
                 }
             }
@@ -209,9 +238,13 @@ function checkLoginStatus() {
             authButtons.classList.remove('hidden');
             userProfileDiv.classList.add('hidden');
         }
+        
+    } catch (error) {
+        console.error('Lỗi kiểm tra session:', error);
+        // Nếu lỗi, hiển thị nút đăng nhập
+        authButtons.classList.remove('hidden');
+        userProfileDiv.classList.add('hidden');
     }
-    
-    
 }
     
     
@@ -240,7 +273,7 @@ async function handleRegisterSubmit(event) {
     };
     
     try {
-        const response = await fetch('db.php/register.php', {
+        const response = await fetch(apiUrl('db.php/register.php'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(formData)
@@ -277,7 +310,7 @@ async function handleLoginSubmit(event) {
     };
     
     try {
-        const response = await fetch('db.php/login.php', {
+        const response = await fetch(apiUrl('db.php/login.php'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(formData)
@@ -286,15 +319,7 @@ async function handleLoginSubmit(event) {
         const result = await response.json();
 
         if (response.ok && result.success) {
-            // Đăng nhập thành công
-            localStorage.setItem('isLoggedIn', 'true');
-            localStorage.setItem('username', result.username); 
-            localStorage.setItem('role', result.role || 'user'); 
-            
-            // FIX QUAN TRỌNG: Lưu email và postCount mới nhận từ PHP
-            localStorage.setItem('email', result.email);
-            localStorage.setItem('postCount', result.postCount); 
-
+            // Đăng nhập thành công - Session được tạo ở server
             alert(result.message);
             window.location.href = 'index.html'; 
         } else {
@@ -307,53 +332,26 @@ async function handleLoginSubmit(event) {
     }
 }
 
-function logout() {
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('username');
-    localStorage.removeItem('postCount');
-    localStorage.removeItem('role'); // Xóa role khi logout
-    localStorage.removeItem('email'); // Xóa email khi logout
-    alert('➡️ Bạn đã đăng xuất.');
-    window.location.reload();
+async function logout() {
+    try {
+        const response = await fetch(apiUrl('db.php/logout.php'), {
+            method: 'POST'
+        });
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('➡️ Bạn đã đăng xuất.');
+            window.location.href = 'index.html';
+        }
+    } catch (error) {
+        console.error('Lỗi đăng xuất:', error);
+        alert('Có lỗi xảy ra khi đăng xuất.');
+    }
 }
 window.logout = logout; 
 
 
-async function handleForgotPasswordSubmit(event) {
-    event.preventDefault();
-    const email = document.getElementById('fp-email').value.trim();
-    
-    if (!email) {
-        alert('Vui lòng nhập email của bạn.');
-        return;
-    }
-
-    const formData = {
-        email: email
-    };
-    
-    try {
-        const response = await fetch('db.php/forgot_password.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData)
-        });
-
-        const result = await response.json();
-
-        if (response.ok && result.success) {
-            alert(result.message);
-            // Vẫn cho người dùng quay lại trang đăng nhập sau khi gửi yêu cầu
-            window.location.href = 'dangnhap.html'; 
-        } else {
-            alert('Lỗi: ' + (result.message || 'Lỗi không xác định.'));
-        }
-
-    } catch (error) {
-        console.error('Lỗi kết nối:', error);
-        alert('Lỗi kết nối server. Vui lòng kiểm tra console log để xem lỗi.');
-    }
-}
+// Hàm handleForgotPasswordSubmit cũ đã được thay thế bằng handleSendOTP (SMS) ở cuối file
 
 
     // =========================================================
@@ -362,7 +360,8 @@ async function handleForgotPasswordSubmit(event) {
 async function fetchPosts(params = {}) {
     const query = new URLSearchParams(params).toString();
     try {
-        const response = await fetch(`db.php/get_posts.php?${query}`);
+        const url = window.apiUrl ? apiUrl(`db.php/get_posts.php?${query}`) : `/Project/db.php/get_posts.php?${query}`;
+        const response = await fetch(url);
         const result = await response.json();
         
         if (result.success) {
@@ -381,14 +380,16 @@ function createPostCard(post) {
     // Tạo tóm tắt tạm thời
     const summary = post.content.substring(0, 150) + '...'; 
 
-    // SỬA LỖI 404: Bổ sung PUBLIC_UPLOAD_PREFIX
-    let imageUrl = post.image_url;
-    if (imageUrl && !imageUrl.startsWith(PUBLIC_UPLOAD_PREFIX)) {
-        imageUrl = PUBLIC_UPLOAD_PREFIX + imageUrl;
-    } else if (!imageUrl) {
-        imageUrl = 'img/1.jpg'; // Ảnh mặc định nếu không có URL
+    // Xử lý ảnh - ảnh được lưu trong thư mục uploads/
+    let imageUrl;
+    if (post.image_url && post.image_url.trim() !== '') {
+        // Có ảnh upload - lấy từ thư mục uploads/
+        imageUrl = 'uploads/' + post.image_url;
+    } else {
+        // Không có ảnh - dùng ảnh mặc định dựa trên ID của post (1-5)
+        const imageNum = ((post.id - 1) % 5) + 1;
+        imageUrl = 'img/' + imageNum + '.jpg';
     }
-    // END FIX
 
     // Định dạng lại ngày tháng
     const postDate = new Date(post.created_at).toLocaleDateString('vi-VN');
@@ -452,24 +453,14 @@ async function renderPostsToContainer(targetElementId, params = {}) {
 // LOGIC MỚI: RENDER BÀI VIẾT CỦA USER TRÊN TRANG PROFILE
 async function renderMyPosts() {
     const container = document.getElementById('my-posts-list');
-    const currentUser = localStorage.getItem('username');
-    if (!container || !currentUser) return;
+    if (!container) return;
 
-    // Fetch bài viết theo tác giả, bao gồm tất cả trạng thái 
-    // FIX: Đảm bảo fetch với status: 'all' khi có authorFilter
-    const myPosts = await fetchPosts({ author: currentUser, status: 'all' });
+    // Fetch bài viết của user hiện tại (session được kiểm tra ở server)
+    const myPosts = await fetchPosts({ author: 'me', status: 'all' });
     
-    // Cập nhật số lượng bài đăng TRONG LOCALSTORAGE
-    localStorage.setItem('postCount', myPosts.length);
-    // Sau khi cập nhật, cần gọi lại checkLoginStatus để cập nhật header
+    // Cập nhật header sau khi load bài viết
     checkLoginStatus(); 
     
-    // Cập nhật số lượng bài đăng trên giao diện
-    const profilePostCount = document.getElementById('profile-post-count');
-    if(profilePostCount) {
-         profilePostCount.textContent = myPosts.length;
-    }
-
     if (myPosts.length === 0) {
         container.innerHTML = `<p class="text-center text-gray-500 py-6">Bạn chưa có bài viết nào. Hãy <a href="dangtin.html" class="text-teal-600 hover:underline">Đăng Tin</a> để chia sẻ kinh nghiệm!</p>`;
         return;
@@ -480,9 +471,8 @@ async function renderMyPosts() {
         const statusClass = post.status === 'approved' ? 'text-green-600' : (post.status === 'pending' ? 'text-yellow-600' : 'text-red-600');
         const statusText = post.status === 'approved' ? '✅ Đã Duyệt' : (post.status === 'pending' ? '⏳ Chờ Duyệt' : '❌ Bị Từ Chối');
         
-        // Nút xóa chỉ hiển thị nếu KHÔNG phải là bài đã duyệt VÀ là TÁC GIẢ
-        const deleteButton = (post.status !== 'approved' && post.author_username === currentUser) ?
-            // FIX: Sử dụng data-action và data-post-id
+        // Nút xóa chỉ hiển thị nếu KHÔNG phải là bài đã duyệt
+        const deleteButton = (post.status !== 'approved') ?
             `<button data-action="delete" data-post-id="${post.id}" class="text-sm text-red-500 hover:text-red-700 transition font-medium ml-3">🗑️ Xóa</button>` : '';
 
         return `
@@ -497,6 +487,14 @@ async function renderMyPosts() {
     }).join('');
 
     container.innerHTML = postsHtml;
+    
+    // Gắn event listener cho nút xóa
+    container.querySelectorAll('[data-action="delete"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const postId = btn.getAttribute('data-post-id');
+            deletePost(postId);
+        });
+    });
 }
 
 // Cập nhật renderPostDetail để dùng API và hiển thị Admin Note
@@ -510,37 +508,28 @@ async function renderPostDetail() {
         return;
     }
     
-    // Fetch bài viết chi tiết
-    // GỌI API MỚI (truyền cả username để kiểm tra quyền tác giả)
-    const currentUser = localStorage.getItem('username') || '';
-    const posts = await fetchPosts({ id: postId, author: currentUser });
+    // Fetch bài viết chi tiết (session được kiểm tra ở server)
+    const posts = await fetchPosts({ id: postId });
     const post = posts[0];
-    
-    // SỬA LỖI 404: Bổ sung PUBLIC_UPLOAD_PREFIX
-    let imageUrl = post.image_url;
-    if (imageUrl && !imageUrl.startsWith(PUBLIC_UPLOAD_PREFIX)) {
-        imageUrl = PUBLIC_UPLOAD_PREFIX + imageUrl;
-    } else if (!imageUrl) {
-        imageUrl = 'img/1.jpg'; // Ảnh mặc định nếu không có URL
-    }
-    // END FIX
     
     if (!post) {
          if(container) container.innerHTML = '<h1 class="text-3xl font-bold text-red-500 text-center">Bài viết không tồn tại.</h1>';
          return;
     }
     
-    // Logic kiểm tra quyền truy cập đã được chuyển sang PHP, nhưng vẫn kiểm tra lại ở frontend 
-    // để xử lý trường hợp API trả về lỗi 403 (dù fetchPosts sẽ trả về posts rỗng)
-    // Nếu post tồn tại (nghĩa là user có quyền xem), ta tiếp tục
-    const isAuthor = currentUser === post.author_username;
-    const isAdmin = localStorage.getItem('role') === 'admin';
-    
-    if (post.status !== 'approved' && !isAuthor && !isAdmin) {
-         // Trường hợp fetchPosts trả về bài viết nhưng không phải 'approved' và user không phải tác giả/admin
-         if(container) container.innerHTML = '<h1 class="text-3xl font-bold text-red-500 text-center">Bài viết này chưa được phê duyệt hoặc đã bị từ chối.</h1>';
-         return;
+    // Xử lý ảnh - ảnh được lưu trong thư mục uploads/
+    let imageUrl;
+    if (post.image_url && post.image_url.trim() !== '') {
+        // Có ảnh upload - lấy từ thư mục uploads/
+        imageUrl = 'uploads/' + post.image_url;
+    } else {
+        // Không có ảnh - dùng ảnh mặc định dựa trên ID
+        const imageNum = ((post.id - 1) % 5) + 1;
+        imageUrl = 'img/' + imageNum + '.jpg';
     }
+    
+    // Logic kiểm tra quyền truy cập đã được xử lý ở server
+    // Nếu post tồn tại, nghĩa là user có quyền xem
     
     // --- Bắt đầu tạo HTML ---
     document.title = post.title + ' | SeaTech';
@@ -617,26 +606,16 @@ window.renderPostDetail = renderPostDetail;
 
 // Hàm xóa bài viết (Sử dụng lại logic từ trang Profile)
 async function deletePost(postId) {
-    const currentUser = localStorage.getItem('username');
-    const userRole = localStorage.getItem('role');
-    
-    if (!currentUser) {
-        alert('Bạn cần đăng nhập để thực hiện hành động này.');
-        return;
-    }
-    
     if (!confirm('Bạn có chắc chắn muốn XÓA bài viết này không? Hành động này không thể hoàn tác.')) {
         return;
     }
 
     const formData = {
-        post_id: postId,
-        username: currentUser,
-        role: userRole
+        post_id: postId
     };
     
     try {
-        const response = await fetch('db.php/delete_post.php', {
+        const response = await fetch(apiUrl('db.php/delete_post.php'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(formData)
@@ -649,7 +628,6 @@ async function deletePost(postId) {
             
             // Tải lại tab Admin đang xem
             if (window.location.pathname.endsWith('admin.html')) {
-                // Kiểm tra tab nào đang active và tải lại tab đó
                 const pendingTab = document.querySelector('.admin-tab[data-tab="pending"]');
                 if (pendingTab && pendingTab.classList.contains('active')) {
                     renderAdminDashboard();
@@ -660,6 +638,11 @@ async function deletePost(postId) {
                 renderMyPosts(); 
             }
             
+        } else if (response.status === 401) {
+            alert('Bạn cần đăng nhập để thực hiện hành động này.');
+            window.location.href = 'dangnhap.html';
+        } else if (response.status === 403) {
+            alert('Bạn không có quyền xóa bài viết này.');
         } else {
             alert('Lỗi Xóa bài viết: ' + (result.message || 'Lỗi không xác định.'));
         }
@@ -777,44 +760,36 @@ async function handleSubmitPost(event) {
     const title = document.getElementById('post-title').value.trim();
     const content = document.getElementById('post-content').value.trim();
     const category = document.getElementById('post-category').value;
-    const author = localStorage.getItem('username');
-    // THÊM: Lấy file đầu tiên từ input
-    const postMedia = document.getElementById('post-media').files[0]; 
-
-    if (!author) {
-        alert('Bạn cần đăng nhập để đăng bài viết. Chuyển hướng đến trang Đăng nhập.');
-        window.location.href = 'dangnhap.html';
-        return;
-    }
+    const postMedia = document.getElementById('post-media').files[0];
 
     if (title.length < 5 || content.length < 10 || category.length === 0) {
         alert('Vui lòng điền đủ Tiêu đề (tối thiểu 5 ký tự), Nội dung (tối thiểu 10 ký tự) và chọn Phân loại.');
         return;
     }
 
-    // THAY THẾ: Chuyển từ JSON sang FormData để có thể gửi file
+    // Tạo FormData để gửi file
     const formData = new FormData();
     formData.append('title', title);
     formData.append('content', content);
     formData.append('category', category);
-    formData.append('author', author);
     if (postMedia) {
-        formData.append('post-media', postMedia); // Tên trường file phải khớp với PHP
+        formData.append('post-media', postMedia);
     }
 
     try {
-        const response = await fetch('db.php/submit_post.php', {
+        const response = await fetch(apiUrl('db.php/submit_post.php'), {
             method: 'POST',
-            // BỎ DÒNG headers: {'Content-Type': 'application/json'}
-            body: formData // Truyền trực tiếp đối tượng FormData
+            body: formData
         });
 
         const result = await response.json();
 
         if (response.ok && result.success) {
             alert(result.message);
-            // FIX: Chuyển hướng về trang profile sau khi đăng bài để kích hoạt renderMyPosts() cập nhật postCount
             window.location.href = 'profile.html'; 
+        } else if (response.status === 401) {
+            alert('Bạn cần đăng nhập để đăng bài viết.');
+            window.location.href = 'dangnhap.html';
         } else {
             alert('Lỗi Đăng bài: ' + (result.message || 'Lỗi không xác định.'));
         }
@@ -829,25 +804,18 @@ window.handleSubmitPost = handleSubmitPost;
 
 // Thêm hàm này vào script.js
 async function handleApproval(postId, action, adminNote) {
-    const adminUsername = localStorage.getItem('username'); // Lấy admin đang đăng nhập
-    if (localStorage.getItem('role') !== 'admin') {
-        alert('Chỉ admin mới có quyền thực hiện hành động này.');
-        return;
-    }
-    
     if (!confirm(`Bạn có chắc muốn ${action === 'approve' ? 'Phê duyệt' : 'Từ chối'} bài viết ID: ${postId}?`)) {
         return;
     }
 
     const formData = {
         post_id: postId,
-        action: action, // 'approve' hoặc 'reject'
-        admin_note: adminNote,
-        admin_username: adminUsername
+        action: action,
+        admin_note: adminNote
     };
     
     try {
-        const response = await fetch('db.php/approve_post.php', {
+        const response = await fetch(apiUrl('db.php/approve_post.php'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(formData)
@@ -857,8 +825,10 @@ async function handleApproval(postId, action, adminNote) {
 
         if (response.ok && result.success) {
             alert(result.message);
-            // Tải lại bảng điều khiển để cập nhật danh sách
             renderAdminDashboard(); 
+        } else if (response.status === 403) {
+            alert('Bạn không có quyền thực hiện hành động này.');
+            window.location.href = 'index.html';
         } else {
             alert('Lỗi: ' + (result.message || 'Lỗi không xác định.'));
         }
@@ -868,7 +838,7 @@ async function handleApproval(postId, action, adminNote) {
         alert('Lỗi kết nối server. Vui lòng kiểm tra console log.');
     }
 }
-window.handleApproval = handleApproval; // Đảm bảo gọi được
+window.handleApproval = handleApproval;
 // =========================================================
 // CHỨC NĂNG D: XỬ LÝ ĐẶT LẠI MẬT KHẨU
 // =========================================================
@@ -903,7 +873,7 @@ async function handleResetPasswordSubmit(event) {
     };
     
     try {
-        const response = await fetch('db.php/reset_password.php', {
+        const response = await fetch(apiUrl('db.php/reset_password.php'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(formData)
@@ -957,3 +927,643 @@ function initializeCarousel() {
     setInterval(nextSlide, 5000); 
 }
 window.initializeCarousel = initializeCarousel; // Cần thiết để hàm được gọi
+
+// =========================================================
+// CHỨC NĂNG: CHỈNH SỬA THÔNG TIN PROFILE
+// =========================================================
+
+window.openEditModal = function() {
+    // Lấy thông tin hiện tại từ session
+    const url = window.apiUrl ? apiUrl('db.php/check_session.php') : '/Project/db.php/check_session.php';
+    fetch(url)
+        .then(response => response.json())
+        .then(result => {
+            if (result.isLoggedIn) {
+                document.getElementById('edit-username').value = result.username;
+                document.getElementById('edit-email').value = result.email;
+                document.getElementById('edit-modal').classList.remove('hidden');
+            }
+        })
+        .catch(error => {
+            console.error('Lỗi load thông tin:', error);
+            alert('Không thể tải thông tin. Vui lòng thử lại.');
+        });
+};
+
+window.closeEditModal = function() {
+    document.getElementById('edit-modal').classList.add('hidden');
+    // Reset form
+    const form = document.getElementById('edit-profile-form');
+    if (form) form.reset();
+};
+
+// Xử lý submit form chỉnh sửa
+document.addEventListener('DOMContentLoaded', () => {
+    const editForm = document.getElementById('edit-profile-form');
+    if (editForm) {
+        editForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById('edit-username').value.trim();
+            const email = document.getElementById('edit-email').value.trim();
+            const currentPassword = document.getElementById('edit-current-password').value;
+            const newPassword = document.getElementById('edit-new-password').value;
+
+            // Validate
+            if (!username || !email) {
+                alert('Vui lòng điền đủ thông tin.');
+                return;
+            }
+
+            if (newPassword && newPassword.length < 6) {
+                alert('Mật khẩu mới phải có ít nhất 6 ký tự.');
+                return;
+            }
+
+            if (newPassword && !currentPassword) {
+                alert('Vui lòng nhập mật khẩu hiện tại để đổi mật khẩu.');
+                return;
+            }
+
+            const formData = {
+                username: username,
+                email: email,
+                current_password: currentPassword,
+                new_password: newPassword
+            };
+
+            try {
+                const url = window.apiUrl ? apiUrl('db.php/update_profile.php') : '/Project/db.php/update_profile.php';
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    alert(result.message);
+                    closeEditModal();
+                    // Reload trang để cập nhật thông tin
+                    window.location.reload();
+                } else {
+                    alert('Lỗi: ' + (result.message || 'Không thể cập nhật thông tin.'));
+                }
+
+            } catch (error) {
+                console.error('Lỗi kết nối:', error);
+                alert('Lỗi kết nối server.');
+            }
+        });
+    }
+});
+
+// Functions đã được export ở trên
+
+
+// =========================================================
+// CHỨC NĂNG: CHATBOT AI
+// =========================================================
+
+let chatbotVisible = false;
+
+function toggleChatbot() {
+    const window = document.getElementById('chatbot-window');
+    if (!window) return;
+    
+    chatbotVisible = !chatbotVisible;
+    
+    if (chatbotVisible) {
+        window.classList.remove('hidden');
+    } else {
+        window.classList.add('hidden');
+    }
+}
+
+function handleChatKeyPress(event) {
+    if (event.key === 'Enter') {
+        sendChatMessage();
+    }
+}
+
+async function sendChatMessage() {
+    const input = document.getElementById('chat-input');
+    const message = input.value.trim();
+    
+    if (!message) return;
+    
+    // Hiển thị tin nhắn của user
+    addChatMessage(message, 'user');
+    input.value = '';
+    
+    // Hiển thị typing indicator
+    addChatMessage('Đang suy nghĩ...', 'bot', true);
+    
+    try {
+        const url = window.apiUrl ? apiUrl('db.php/chatbot.php') : '/Project/db.php/chatbot.php';
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: message })
+        });
+        
+        const result = await response.json();
+        
+        // Xóa typing indicator
+        removeTypingIndicator();
+        
+        if (result.success) {
+            addChatMessage(result.response, 'bot');
+        } else {
+            addChatMessage('Xin lỗi, tôi không thể trả lời câu hỏi này lúc này.', 'bot');
+        }
+    } catch (error) {
+        console.error('Lỗi chatbot:', error);
+        removeTypingIndicator();
+        addChatMessage('Lỗi kết nối. Vui lòng thử lại sau.', 'bot');
+    }
+}
+
+function addChatMessage(message, sender, isTyping = false) {
+    const container = document.getElementById('chat-messages');
+    if (!container) return;
+    
+    const messageDiv = document.createElement('div');
+    
+    if (sender === 'user') {
+        messageDiv.className = 'bg-teal-600 text-white p-3 rounded-lg ml-8 shadow-sm';
+    } else {
+        messageDiv.className = 'bg-white p-3 rounded-lg mr-8 shadow-sm';
+        if (isTyping) {
+            messageDiv.id = 'typing-indicator';
+        }
+    }
+    
+    messageDiv.innerHTML = `<p class="text-sm">${message}</p>`;
+    container.appendChild(messageDiv);
+    container.scrollTop = container.scrollHeight;
+}
+
+function removeTypingIndicator() {
+    const indicator = document.getElementById('typing-indicator');
+    if (indicator) {
+        indicator.remove();
+    }
+}
+
+// Export functions
+window.toggleChatbot = toggleChatbot;
+window.handleChatKeyPress = handleChatKeyPress;
+window.sendChatMessage = sendChatMessage;
+
+
+// =========================================================
+// CHỨC NĂNG: TRANG TIN TỨC
+// =========================================================
+
+let newsCurrentPage = 1;
+
+// Lọc tin tức
+async function filterNews() {
+    const category = document.getElementById('category-filter')?.value || '';
+    const sort = document.getElementById('sort-filter')?.value || 'created_at';
+    const keyword = document.getElementById('keyword-filter')?.value || '';
+    
+    newsCurrentPage = 1;
+    await loadNews(category, sort, keyword, 1);
+}
+
+// Load tin tức
+async function loadNews(category = '', sort = 'created_at', keyword = '', page = 1) {
+    const container = document.getElementById('news-list');
+    if (!container) return;
+    
+    container.innerHTML = '<p class="col-span-full text-center text-gray-500 py-10">Đang tải...</p>';
+    
+    try {
+        const params = new URLSearchParams({
+            category: category,
+            sort: sort,
+            keyword: keyword,
+            page: page,
+            limit: 9,
+            status: 'approved'
+        });
+        
+        const url = window.apiUrl ? apiUrl(`db.php/get_posts.php?${params}`) : `/Project/db.php/get_posts.php?${params}`;
+        const response = await fetch(url);
+        const result = await response.json();
+        
+        if (result.success && result.posts.length > 0) {
+            const newsHtml = result.posts.map(post => {
+                const imageUrl = post.image_url ? 
+                    (window.apiUrl ? apiUrl('db.php/get_image.php?file=' + post.image_url) : '/Project/db.php/get_image.php?file=' + post.image_url) : 
+                    'img/1.jpg';
+                
+                const summary = post.content.substring(0, 120) + '...';
+                const postDate = new Date(post.created_at).toLocaleDateString('vi-VN');
+                
+                const categoryColors = {
+                    'kinh-nghiem': 'blue',
+                    'tin-tuc': 'green',
+                    'hoi-dap': 'purple',
+                    'thi-truong': 'orange'
+                };
+                const color = categoryColors[post.category] || 'gray';
+                
+                const categoryNames = {
+                    'kinh-nghiem': 'Kinh Nghiệm',
+                    'tin-tuc': 'Tin Tức',
+                    'hoi-dap': 'Hỏi Đáp',
+                    'thi-truong': 'Thị Trường'
+                };
+                const categoryName = categoryNames[post.category] || post.category;
+                
+                return `
+                    <article class="bg-white rounded-xl shadow-lg hover:shadow-xl transition duration-300 overflow-hidden">
+                        <img src="${imageUrl}" alt="${post.title}" class="w-full h-48 object-cover">
+                        <div class="p-5">
+                            <span class="text-xs font-semibold text-${color}-600 bg-${color}-100 px-2 py-0.5 rounded">${categoryName}</span>
+                            <h3 class="text-xl font-semibold text-gray-800 my-2 hover:text-teal-600">
+                                <a href="chitiet.html?id=${post.id}">${post.title}</a>
+                            </h3>
+                            <p class="text-gray-600 text-sm mb-4 line-clamp-3">${summary}</p>
+                            <div class="flex justify-between items-center text-xs text-gray-500 border-t pt-3">
+                                <span>Ngày: ${postDate}</span>
+                                <span class="font-medium text-teal-600">👤 ${post.author_username}</span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs text-gray-500 mt-2">
+                                <span>👁️ ${post.views || 0} lượt xem</span>
+                                <span>⭐ ${post.rating_count > 0 ? (post.rating_total / post.rating_count).toFixed(1) : '0'}</span>
+                            </div>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+            
+            container.innerHTML = newsHtml;
+            
+            // Tạo phân trang
+            createNewsPagination(result.totalPages || 1);
+        } else {
+            container.innerHTML = '<p class="col-span-full text-center text-gray-500 py-10">Không tìm thấy tin tức nào.</p>';
+        }
+    } catch (error) {
+        console.error('Lỗi:', error);
+        container.innerHTML = '<p class="col-span-full text-center text-red-500 py-10">Lỗi kết nối server.</p>';
+    }
+}
+
+// Tạo phân trang cho tin tức
+function createNewsPagination(totalPages) {
+    const container = document.getElementById('news-pagination');
+    if (!container) return;
+    
+    let paginationHtml = '<div class="flex space-x-1">';
+    
+    // Nút Previous
+    if (newsCurrentPage > 1) {
+        paginationHtml += `<button onclick="changeNewsPage(${newsCurrentPage - 1})" class="px-4 py-2 text-sm font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 rounded-l-lg">‹ Trước</button>`;
+    }
+    
+    // Các số trang
+    for (let i = Math.max(1, newsCurrentPage - 2); i <= Math.min(totalPages, newsCurrentPage + 2); i++) {
+        const activeClass = i === newsCurrentPage ? 'bg-teal-600 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-100';
+        paginationHtml += `<button onclick="changeNewsPage(${i})" class="px-4 py-2 text-sm font-medium ${activeClass}">${i}</button>`;
+    }
+    
+    // Nút Next
+    if (newsCurrentPage < totalPages) {
+        paginationHtml += `<button onclick="changeNewsPage(${newsCurrentPage + 1})" class="px-4 py-2 text-sm font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 rounded-r-lg">Tiếp ›</button>`;
+    }
+    
+    paginationHtml += '</div>';
+    container.innerHTML = paginationHtml;
+}
+
+// Chuyển trang tin tức
+function changeNewsPage(page) {
+    newsCurrentPage = page;
+    const category = document.getElementById('category-filter')?.value || '';
+    const sort = document.getElementById('sort-filter')?.value || 'created_at';
+    const keyword = document.getElementById('keyword-filter')?.value || '';
+    loadNews(category, sort, keyword, page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Export functions
+window.filterNews = filterNews;
+window.changeNewsPage = changeNewsPage;
+
+// Auto load khi vào trang tin tức
+document.addEventListener('DOMContentLoaded', () => {
+    if (window.location.pathname.endsWith('tintuc.html')) {
+        loadNews();
+    }
+});
+
+
+// =========================================================
+// CHỨC NĂNG: TRANG KỸ THUẬT NUÔI
+// =========================================================
+
+let kyThuatNuoiCurrentPage = 1;
+
+// Lọc kỹ thuật nuôi
+async function filterKyThuatNuoi() {
+    const species = document.getElementById('species-select')?.value || '';
+    const stage = document.getElementById('stage-select')?.value || '';
+    
+    kyThuatNuoiCurrentPage = 1;
+    await loadKyThuatNuoi(species, stage, 1);
+}
+
+// Load kỹ thuật nuôi
+async function loadKyThuatNuoi(species = '', stage = '', page = 1) {
+    const container = document.getElementById('kythuat-nuoi-list');
+    if (!container) return;
+    
+    container.innerHTML = '<p class="text-center text-gray-500 py-10">Đang tải...</p>';
+    
+    try {
+        const params = new URLSearchParams({
+            species: species,
+            stage: stage,
+            page: page,
+            limit: 10,
+            status: 'approved'
+        });
+        
+        const url = window.apiUrl ? apiUrl(`db.php/get_technical_posts.php?${params}`) : `/Project/db.php/get_technical_posts.php?${params}`;
+        const response = await fetch(url);
+        const result = await response.json();
+        
+        if (result.success && result.posts.length > 0) {
+            const postsHtml = result.posts.map(post => {
+                const summary = post.content.substring(0, 150) + '...';
+                const postDate = new Date(post.created_at).toLocaleDateString('vi-VN');
+                
+                const colors = ['blue', 'green', 'purple', 'orange', 'red'];
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                
+                return `
+                    <article class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition border-l-4 border-${color}-600">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <span class="text-xs font-semibold text-${color}-600 bg-${color}-100 px-2 py-0.5 rounded">${post.category || 'Kỹ Thuật'}</span>
+                                <h3 class="text-2xl font-bold text-gray-800 mt-1 mb-2 hover:text-teal-600">
+                                    <a href="chitiet.html?id=${post.id}">${post.title}</a>
+                                </h3>
+                            </div>
+                            <span class="text-sm text-gray-500">Ngày: ${postDate}</span>
+                        </div>
+                        <p class="text-gray-600 line-clamp-3 text-sm mt-2">${summary}</p>
+                        <div class="flex justify-between items-center mt-3">
+                            <a href="chitiet.html?id=${post.id}" class="text-teal-600 font-medium hover:underline text-sm">Xem chi tiết →</a>
+                            <div class="flex items-center space-x-3 text-xs text-gray-500">
+                                <span>👁️ ${post.views || 0}</span>
+                                <span>⭐ ${post.rating_count > 0 ? (post.rating_total / post.rating_count).toFixed(1) : '0'}</span>
+                            </div>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+            
+            container.innerHTML = postsHtml;
+            
+            // Tạo phân trang
+            createKyThuatNuoiPagination(result.totalPages || 1);
+        } else {
+            container.innerHTML = '<p class="text-center text-gray-500 py-10">Không tìm thấy bài viết nào.</p>';
+        }
+    } catch (error) {
+        console.error('Lỗi:', error);
+        container.innerHTML = '<p class="text-center text-red-500 py-10">Lỗi kết nối server.</p>';
+    }
+}
+
+// Tạo phân trang
+function createKyThuatNuoiPagination(totalPages) {
+    const container = document.getElementById('kythuat-nuoi-pagination');
+    if (!container) return;
+    
+    let paginationHtml = '<div class="flex space-x-1">';
+    
+    if (kyThuatNuoiCurrentPage > 1) {
+        paginationHtml += `<button onclick="changeKyThuatNuoiPage(${kyThuatNuoiCurrentPage - 1})" class="px-4 py-2 text-sm font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 rounded-l-lg">‹</button>`;
+    }
+    
+    for (let i = Math.max(1, kyThuatNuoiCurrentPage - 2); i <= Math.min(totalPages, kyThuatNuoiCurrentPage + 2); i++) {
+        const activeClass = i === kyThuatNuoiCurrentPage ? 'bg-teal-600 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-100';
+        paginationHtml += `<button onclick="changeKyThuatNuoiPage(${i})" class="px-4 py-2 text-sm font-medium ${activeClass}">${i}</button>`;
+    }
+    
+    if (kyThuatNuoiCurrentPage < totalPages) {
+        paginationHtml += `<button onclick="changeKyThuatNuoiPage(${kyThuatNuoiCurrentPage + 1})" class="px-4 py-2 text-sm font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 rounded-r-lg">›</button>`;
+    }
+    
+    paginationHtml += '</div>';
+    container.innerHTML = paginationHtml;
+}
+
+// Chuyển trang
+function changeKyThuatNuoiPage(page) {
+    kyThuatNuoiCurrentPage = page;
+    const species = document.getElementById('species-select')?.value || '';
+    const stage = document.getElementById('stage-select')?.value || '';
+    loadKyThuatNuoi(species, stage, page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Export functions
+window.filterKyThuatNuoi = filterKyThuatNuoi;
+window.changeKyThuatNuoiPage = changeKyThuatNuoiPage;
+
+// Auto load
+document.addEventListener('DOMContentLoaded', () => {
+    if (window.location.pathname.endsWith('kythuat-nuoi.html')) {
+        loadKyThuatNuoi();
+    }
+});
+
+
+// =========================================================
+// CHỨC NĂNG AVATAR ĐÃ TẠM THỜI VÔ HIỆU HÓA
+// =========================================================
+// Các chức năng avatar đã được tạm thời vô hiệu hóa để tránh lỗi
+
+
+// =========================================================
+// HELPER FUNCTION: SHOW MESSAGE
+// =========================================================
+
+function showMessage(element, message, type) {
+    if (!element) return;
+    
+    element.textContent = message;
+    element.className = 'mt-4 p-3 rounded-lg';
+    
+    if (type === 'success') {
+        element.classList.add('bg-green-100', 'text-green-800', 'border', 'border-green-300');
+    } else if (type === 'error') {
+        element.classList.add('bg-red-100', 'text-red-800', 'border', 'border-red-300');
+    }
+    
+    element.classList.remove('hidden');
+}
+
+// =========================================================
+// CHỨC NĂNG: QUÊN MẬT KHẨU QUA SMS
+// =========================================================
+
+let userPhone = '';  // Lưu số điện thoại để dùng cho verify OTP
+
+// Xử lý form gửi OTP
+document.addEventListener('DOMContentLoaded', () => {
+    const forgotForm = document.getElementById('forgot-password-form');
+    const verifyForm = document.getElementById('verify-otp-form');
+    
+    if (forgotForm) {
+        forgotForm.addEventListener('submit', handleSendOTP);
+    }
+    
+    if (verifyForm) {
+        verifyForm.addEventListener('submit', handleVerifyOTP);
+    }
+});
+
+async function handleSendOTP(event) {
+    event.preventDefault();
+    
+    const phone = document.getElementById('fp-phone').value.trim();
+    const messageDiv = document.getElementById('forgot-message');
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    
+    if (!phone) {
+        showMessage(messageDiv, 'Vui lòng nhập số điện thoại.', 'error');
+        return;
+    }
+    
+    // Validate số điện thoại Việt Nam
+    if (!validateVietnamesePhone(phone)) {
+        showMessage(messageDiv, 'Số điện thoại không hợp lệ. Vui lòng nhập số điện thoại Việt Nam.', 'error');
+        return;
+    }
+    
+    userPhone = phone;  // Lưu lại
+    
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '⏳ Đang gửi...';
+    
+    try {
+        const url = window.apiUrl ? apiUrl('db.php/forgot_password_sms.php') : '/Project/db.php/forgot_password_sms.php';
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone: phone })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showMessage(messageDiv, '✅ ' + result.message, 'success');
+            
+            // Chuyển sang form nhập OTP sau 2 giây
+            setTimeout(() => {
+                showOTPForm();
+            }, 2000);
+        } else {
+            showMessage(messageDiv, '❌ ' + result.message, 'error');
+        }
+    } catch (error) {
+        console.error('Lỗi:', error);
+        showMessage(messageDiv, '❌ Lỗi kết nối server.', 'error');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '📨 Gửi Mã OTP';
+    }
+}
+
+async function handleVerifyOTP(event) {
+    event.preventDefault();
+    
+    const otp = document.getElementById('otp-code').value.trim();
+    const newPassword = document.getElementById('new-password').value;
+    const confirmPassword = document.getElementById('confirm-password').value;
+    const messageDiv = document.getElementById('verify-message');
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    
+    if (!otp || !newPassword || !confirmPassword) {
+        showMessage(messageDiv, 'Vui lòng điền đầy đủ thông tin.', 'error');
+        return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+        showMessage(messageDiv, 'Mật khẩu xác nhận không khớp.', 'error');
+        return;
+    }
+    
+    if (newPassword.length < 6) {
+        showMessage(messageDiv, 'Mật khẩu phải có ít nhất 6 ký tự.', 'error');
+        return;
+    }
+    
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '⏳ Đang xử lý...';
+    
+    try {
+        const url = window.apiUrl ? apiUrl('db.php/verify_otp.php') : '/Project/db.php/verify_otp.php';
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                phone: userPhone,
+                otp: otp,
+                new_password: newPassword
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showMessage(messageDiv, '✅ ' + result.message, 'success');
+            
+            // Redirect về trang đăng nhập sau 2 giây
+            setTimeout(() => {
+                window.location.href = 'dangnhap.html';
+            }, 2000);
+        } else {
+            showMessage(messageDiv, '❌ ' + result.message, 'error');
+        }
+    } catch (error) {
+        console.error('Lỗi:', error);
+        showMessage(messageDiv, '❌ Lỗi kết nối server.', 'error');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '✅ Đặt Lại Mật Khẩu';
+    }
+}
+
+function showOTPForm() {
+    document.getElementById('forgot-password-form').classList.add('hidden');
+    document.getElementById('verify-otp-form').classList.remove('hidden');
+}
+
+function showPhoneForm() {
+    document.getElementById('verify-otp-form').classList.add('hidden');
+    document.getElementById('forgot-password-form').classList.remove('hidden');
+    document.getElementById('forgot-message').classList.add('hidden');
+}
+
+function validateVietnamesePhone(phone) {
+    // Số điện thoại Việt Nam: 10 số, bắt đầu bằng 0
+    const regex = /^(0|\+84)(3|5|7|8|9)\d{8}$/;
+    return regex.test(phone.replace(/[\s\-]/g, ''));
+}
+
+// Export functions
+window.handleSendOTP = handleSendOTP;
+window.handleVerifyOTP = handleVerifyOTP;
+window.showOTPForm = showOTPForm;
+window.showPhoneForm = showPhoneForm;

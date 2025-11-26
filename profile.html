@@ -5,9 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hồ Sơ Cá Nhân</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="config.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-gray-50">
+
+    <header class="sticky top-0 z-50 bg-white shadow-md">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <a href="index.html" class="flex items-center space-x-3 hover:opacity-90 transition"><img src="img/logo.png" alt="Logo" class="h-10 w-10"><span class="text-2xl font-bold text-teal-600">Thủy Sản</span></a>
+            </div>
+
+            <nav class="hidden lg:flex space-x-8 text-base font-medium">
+                <a href="index.html" class="text-gray-700 hover:text-teal-600 transition">Trang Chủ</a>
+                <a href="tintuc.html" class="text-gray-700 hover:text-teal-600 transition">Tin Tức</a>
+                <a href="kythuat.html" class="text-gray-700 hover:text-teal-600 transition">Thông tin/Kỹ Thuật Nuôi Trồng</a>
+                <a href="dangtin.html" class="text-gray-700 hover:text-teal-600 transition">Đăng Tin</a>
+            </nav>
+
+            <div class="flex items-center space-x-4">
+                <div class="relative hidden sm:block"><input type="text" id="search-input" placeholder="Tìm kiếm... (Enter)" onkeypress="if(event.key==='Enter') performSearch()" class="px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm w-64 bg-white hover:border-teal-400 transition shadow-sm"></div>
+
+                <div id="auth-buttons">
+                    <a href="dangnhap.html" class="text-sm font-medium text-gray-700 hover:text-teal-600 transition">Đăng Nhập</a>
+                    <a href="dangky.html" class="ml-2 px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-full hover:bg-teal-700 transition">Đăng Ký</a>
+                </div>
+
+                <div id="user-profile" class="hidden relative">
+                    <button class="flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-slate-700 to-slate-800 text-white rounded-full border-2 border-teal-500 shadow-md hover:shadow-lg hover:border-teal-400 transition" id="user-menu-btn">
+                        <div class="w-8 h-8 bg-teal-500 rounded-full flex items-center justify-center"><span class="text-white text-sm font-bold">U</span></div>
+                        <span class="text-sm font-bold">user_tv</span>
+                    </button>
+                    <div id="user-menu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden">
+                        <a href="profile.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">👤 Profile (0 bài)</a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onclick="logout()">🚪 Đăng Xuất</a>
+                    </div>
+                </div>
+
+                <button id="mobile-menu-toggle" class="lg:hidden text-gray-700 hover:text-teal-600 transition">☰</button>
+            </div>
+        </div>
+
+        <div id="mobile-menu" class="lg:hidden bg-white border-t border-gray-200 hidden">
+            <nav class="flex flex-col space-y-2 p-4 text-sm font-medium">
+                <a href="index.html" class="text-gray-700 hover:text-teal-600 transition">Trang Chủ</a>
+                <a href="tintuc.html" class="text-gray-700 hover:text-teal-600 transition">Tin Tức</a>
+                <a href="kythuat.html" class="text-gray-700 hover:text-teal-600 transition">Thông tin/Kỹ Thuật Nuôi Trồng</a>
+            </nav>
+        </div>
+    </header>
 
     <main class="container mx-auto px-4 py-10">
         <h1 class="text-4xl font-extrabold text-gray-800 mb-8">👤 Hồ Sơ Cá Nhân</h1>
@@ -16,12 +62,21 @@
             
             <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg h-fit">
                 <div class="flex flex-col items-center border-b pb-4 mb-4">
-                    <img id="profile-avatar" src="img/avt1.jpg" alt="Avatar" class="w-24 h-24 rounded-full object-cover border-4 border-teal-500 mb-4">
-                    <h2 id="profile-username" class="text-2xl font-bold text-gray-800">Anh_Nuoi_Tom_88</h2>
-                    <p class="text-gray-600">Email: <span id="profile-email">Đang tải...</span></p>
+                    <div class="relative mb-4">
+                        <img id="profile-avatar" src="img/avt1.jpg" alt="Avatar" class="w-32 h-32 rounded-full object-cover border-4 border-teal-500 shadow-lg">
+                    </div>
+                    
+                    <h2 id="profile-username" class="text-2xl font-bold text-gray-800 mb-1">Anh_Nuoi_Tom_88</h2>
+                    <p class="text-sm text-gray-500 mb-2">Email: <span id="profile-email">Đang tải...</span></p>
                 </div>
 
                 <div class="space-y-3">
+                    <p class="text-sm text-gray-700 flex justify-between">
+                        <span class="font-medium">Email:</span> <span id="profile-email-detail" class="text-gray-900">Đang tải...</span>
+                    </p>
+                    <p class="text-sm text-gray-700 flex justify-between">
+                        <span class="font-medium">Số điện thoại:</span> <span id="profile-phone" class="text-gray-900">Chưa cập nhật</span>
+                    </p>
                     <p class="text-sm text-gray-700 flex justify-between">
                         <span class="font-medium">Vị trí:</span> <span>Trà Vinh, Việt Nam</span>
                     </p>
@@ -32,10 +87,6 @@
                         <span class="text-teal-600">Tổng số bài đã đăng:</span> <span id="profile-post-count" class="text-xl text-teal-600">5</span>
                     </p>
                 </div>
-                
-                <button class="mt-6 w-full bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition duration-300 text-sm">
-                    Chỉnh Sửa Thông Tin
-                </button>
             </div>
 
             <div class="lg:col-span-2">
@@ -47,57 +98,62 @@
             </div>
         </div>
     </main>
-    <footer class="bg-gray-900 text-white mt-12 pt-10 pb-6">
+
+
+    <footer class="bg-gradient-to-r from-slate-800 to-slate-900 text-white mt-12 pt-10 pb-6">
     <div class="container mx-auto px-4">
         
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 border-b border-gray-700 pb-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 border-b border-slate-700 pb-8">
             
             <div>
-                <a href="index.html" class="text-2xl font-bold text-teal-400">SeaTech</a>
-                <p class="text-sm text-gray-400 mt-4 leading-relaxed">
+                <a href="index.html" class="flex items-center space-x-2"><img src="img/logo.png" alt="Logo" class="h-8 w-8"><span class="text-2xl font-bold text-teal-400">Thủy Sản</span></a>
+                <p class="text-sm text-white mt-4 leading-relaxed">
                     Cổng thông tin kỹ thuật nuôi trồng thủy sản tập trung vào kinh nghiệm và tài liệu dành cho người nuôi tại tỉnh Trà Vinh.
                 </p>
                 <div class="flex space-x-4 mt-4">
-                    <a href="#" class="text-gray-400 hover:text-teal-400 transition">📘</a> <a href="#" class="text-gray-400 hover:text-teal-400 transition">📺</a> <a href="#" class="text-gray-400 hover:text-teal-400 transition">📧</a> </div>
+                    <a href="#" class="text-white hover:text-teal-400 transition">📘</a> <a href="#" class="text-white hover:text-teal-400 transition">📺</a> <a href="#" class="text-white hover:text-teal-400 transition">📧</a> </div>
             </div>
 
             <div>
                 <h3 class="text-lg font-semibold text-white mb-4 border-b border-teal-500 pb-1">Điều Hướng</h3>
                 <ul class="space-y-2 text-sm">
-                    <li><a href="index.html" class="text-gray-400 hover:text-white transition">Trang Chủ</a></li>
-                    <li><a href="tintuc.html" class="text-gray-400 hover:text-white transition">Tin Tức Cộng Đồng</a></li>
-                    <li><a href="kythuat.html" class="text-gray-400 hover:text-white transition">Thông tin Kỹ Thuật</a></li>
-                    <li><a href="dangtin.html" class="text-gray-400 hover:text-white transition">Đăng Bài/Chia Sẻ</a></li>
+                    <li><a href="index.html" class="text-white hover:text-white transition">Trang Chủ</a></li>
+                    <li><a href="tintuc.html" class="text-white hover:text-white transition">Tin Tức Cộng Đồng</a></li>
+                    <li><a href="kythuat.html" class="text-white hover:text-white transition">Thông tin Kỹ Thuật</a></li>
+                    <li><a href="dangtin.html" class="text-white hover:text-white transition">Đăng Bài/Chia Sẻ</a></li>
                 </ul>
             </div>
 
             <div>
                 <h3 class="text-lg font-semibold text-white mb-4 border-b border-teal-500 pb-1">Tra Cứu Nhanh</h3>
                 <ul class="space-y-2 text-sm">
-                    <li><a href="kythuat-nuoi.html" class="text-gray-400 hover:text-white transition">Kỹ Thuật Nuôi Tôm/Cá</a></li>
-                    <li><a href="benh-thuy-san.html" class="text-gray-400 hover:text-white transition">Phác Đồ Bệnh Thủy Sản</a></li>
-                    <li><a href="tai-lieu-thuy-san.html" class="text-gray-400 hover:text-white transition">Thư Viện Tài Liệu</a></li>
-                    <li><a href="loai-thuy-san.html" class="text-gray-400 hover:text-white transition">Danh Mục Loài</a></li>
+                    <li><a href="kythuat-nuoi.html" class="text-white hover:text-white transition">Kỹ Thuật Nuôi Tôm/Cá</a></li>
+                    <li><a href="benh-thuy-san.html" class="text-white hover:text-white transition">Phác Đồ Bệnh Thủy Sản</a></li>
+                    <li><a href="tai-lieu-thuy-san.html" class="text-white hover:text-white transition">Thư Viện Tài Liệu</a></li>
+                    <li><a href="loai-thuy-san.html" class="text-white hover:text-white transition">Danh Mục Loài</a></li>
                 </ul>
             </div>
 
             <div>
                 <h3 class="text-lg font-semibold text-white mb-4 border-b border-teal-500 pb-1">Liên Hệ</h3>
                 <ul class="space-y-2 text-sm">
-                    <li><span class="text-gray-400">Địa chỉ:</span> <span class="text-white">Trà Vinh, Việt Nam</span></li>
-                    <li><span class="text-gray-400">Email:</span> <a href="mailto:info@tvfishfarm.com" class="text-teal-400 hover:underline">info@tvfishfarm.com</a></li>
-                    <li><span class="text-gray-400">Điện thoại:</span> <span class="text-white">(+84) 9xxyyyyzzz</span></li>
+                    <li><span class="text-white">Địa chỉ:</span> <span class="text-white">Trà Vinh, Việt Nam</span></li>
+                    <li><span class="text-white">Email:</span> <a href="mailto:info@tvfishfarm.com" class="text-teal-400 hover:underline">info@tvfishfarm.com</a></li>
+                    <li><span class="text-white">Điện thoại:</span> <span class="text-white">(+84) 9xxyyyyzzz</span></li>
                 </ul>
             </div>
 
         </div>
         
-        <div class="mt-6 text-center text-sm text-gray-500">
+        <div class="mt-6 text-center text-sm text-gray-400">
             &copy; 2025 Kỹ Thuật Nuôi Trồng Thủy Sản Trà Vinh. Được phát triển tại <span class="text-teal-400">Trà Vinh</span>.
         </div>
     </div>
 </footer>
 
     <script src="script.js"></script>
+    <script>
+        // Script đã được đơn giản hóa - các chức năng avatar đã tạm thời vô hiệu hóa
+    </script>
 </body>
 </html>
