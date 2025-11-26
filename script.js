@@ -127,6 +127,7 @@ function initializeUserMenu(btn, menu) {
 
 function performSearch() {
     const query = document.getElementById('search-input').value.trim();
+    // FIX: Đảm bảo lấy giá trị từ province-select nếu có
     const provinceSelect = document.getElementById('province-select');
     const province = provinceSelect ? provinceSelect.value : 'travinh';
     
@@ -286,14 +287,14 @@ async function handleLoginSubmit(event) {
             localStorage.setItem('username', result.username); 
             localStorage.setItem('role', result.role || 'user'); 
             
-            // FIX QUAN TRỌNG: Lưu postCount mới nhận từ PHP
+            // FIX QUAN TRỌNG: Lưu email và postCount mới nhận từ PHP
             localStorage.setItem('email', result.email);
-            // localStorage.setItem('email', result.email); 
+            localStorage.setItem('postCount', result.postCount); 
 
             alert(result.message);
             window.location.href = 'index.html'; 
         } else {
-            alert('Lỗi Đăng nhập: ' + (result.message || 'Lỗi không xác định.'));
+            alert('Lỗi Đăng nhập: ' + (result.message || 'Tên tài khoản/Email hoặc Mật khẩu không đúng.'));
         }
 
     } catch (error) {
@@ -307,6 +308,7 @@ function logout() {
     localStorage.removeItem('username');
     localStorage.removeItem('postCount');
     localStorage.removeItem('role'); // Xóa role khi logout
+    localStorage.removeItem('email'); // Xóa email khi logout
     alert('➡️ Bạn đã đăng xuất.');
     window.location.reload();
 }
@@ -337,6 +339,7 @@ async function handleForgotPasswordSubmit(event) {
 
         if (response.ok && result.success) {
             alert(result.message);
+            // Vẫn cho người dùng quay lại trang đăng nhập sau khi gửi yêu cầu
             window.location.href = 'dangnhap.html'; 
         } else {
             alert('Lỗi: ' + (result.message || 'Lỗi không xác định.'));
@@ -382,6 +385,7 @@ function createPostCard(post) {
     
     // Logic nút xóa (chỉ hiển thị trên trang profile)
     const currentUser = localStorage.getItem('username');
+    // FIX: Đảm bảo nút xóa chỉ hiện cho bài chưa duyệt trên trang tin tức/trang chủ
     const deleteButtonHtml = (window.location.pathname.endsWith('profile.html') && post.status !== 'approved' && currentUser === post.author_username) ? 
         `<button data-action="delete" data-post-id="${post.id}" class="text-xs text-red-500 hover:text-red-700 transition font-medium ml-3">🗑️ Xóa</button>` : 
         '';
@@ -389,13 +393,17 @@ function createPostCard(post) {
     // Hiển thị trạng thái duyệt trên Card
     const statusText = post.status === 'pending' ? 'Chờ Duyệt' : (post.status === 'rejected' ? 'Bị Từ Chối' : 'Đã Duyệt');
     const statusClass = post.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : (post.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-teal-100 text-teal-600');
+    // Nếu không phải trang profile, chỉ hiển thị bài đã duyệt, nên ẩn trạng thái
+    const statusBadge = (window.location.pathname.endsWith('profile.html')) ? 
+        `<span class="text-xs font-semibold ${statusClass} px-2 py-0.5 rounded">${post.category} - ${statusText}</span>` : 
+        `<span class="text-xs font-semibold bg-blue-100 text-blue-600 px-2 py-0.5 rounded">${post.category}</span>`;
 
 
     return `
         <article class="bg-white rounded-xl shadow-lg hover:shadow-xl transition duration-300 overflow-hidden">
             <img src="${imageUrl}" alt="${post.title}" class="w-full h-48 object-cover">
             <div class="p-5">
-                <span class="text-xs font-semibold ${statusClass} px-2 py-0.5 rounded">${post.category} - ${statusText}</span>
+                ${statusBadge}
                 <h3 class="text-xl font-semibold text-gray-800 my-2 hover:text-teal-600">
                     <a href="chitiet.html?id=${post.id}">${post.title}</a>
                 </h3>
@@ -438,10 +446,13 @@ async function renderMyPosts() {
     if (!container || !currentUser) return;
 
     // Fetch bài viết theo tác giả, bao gồm tất cả trạng thái 
+    // FIX: Đảm bảo fetch với status: 'all' khi có authorFilter
     const myPosts = await fetchPosts({ author: currentUser, status: 'all' });
     
     // Cập nhật số lượng bài đăng TRONG LOCALSTORAGE
     localStorage.setItem('postCount', myPosts.length);
+    // Sau khi cập nhật, cần gọi lại checkLoginStatus để cập nhật header
+    checkLoginStatus(); 
     
     // Cập nhật số lượng bài đăng trên giao diện
     const profilePostCount = document.getElementById('profile-post-count');
@@ -459,8 +470,8 @@ async function renderMyPosts() {
         const statusClass = post.status === 'approved' ? 'text-green-600' : (post.status === 'pending' ? 'text-yellow-600' : 'text-red-600');
         const statusText = post.status === 'approved' ? '✅ Đã Duyệt' : (post.status === 'pending' ? '⏳ Chờ Duyệt' : '❌ Bị Từ Chối');
         
-        // Nút xóa chỉ hiển thị nếu KHÔNG phải là bài đã duyệt
-        const deleteButton = (post.status !== 'approved') ?
+        // Nút xóa chỉ hiển thị nếu KHÔNG phải là bài đã duyệt VÀ là TÁC GIẢ
+        const deleteButton = (post.status !== 'approved' && post.author_username === currentUser) ?
             // FIX: Sử dụng data-action và data-post-id
             `<button data-action="delete" data-post-id="${post.id}" class="text-sm text-red-500 hover:text-red-700 transition font-medium ml-3">🗑️ Xóa</button>` : '';
 
@@ -490,22 +501,27 @@ async function renderPostDetail() {
     }
     
     // Fetch bài viết chi tiết
-    // GỌI API MỚI
-    const posts = await fetchPosts({ id: postId });
+    // GỌI API MỚI (truyền cả username để kiểm tra quyền tác giả)
+    const currentUser = localStorage.getItem('username') || '';
+    const posts = await fetchPosts({ id: postId, author: currentUser });
     const post = posts[0];
+    
+    // Lấy link ảnh từ csdl
     const imageUrl = post.image_url || 'img/1.jpg'; // Dùng ảnh mặc định nếu không có
     
     if (!post) {
          if(container) container.innerHTML = '<h1 class="text-3xl font-bold text-red-500 text-center">Bài viết không tồn tại.</h1>';
          return;
     }
-
-    // Kiểm tra quyền truy cập: Chỉ cho phép xem nếu là Approved HOẶC là Tác giả/Admin
-    const currentUser = localStorage.getItem('username');
+    
+    // Logic kiểm tra quyền truy cập đã được chuyển sang PHP, nhưng vẫn kiểm tra lại ở frontend 
+    // để xử lý trường hợp API trả về lỗi 403 (dù fetchPosts sẽ trả về posts rỗng)
+    // Nếu post tồn tại (nghĩa là user có quyền xem), ta tiếp tục
     const isAuthor = currentUser === post.author_username;
     const isAdmin = localStorage.getItem('role') === 'admin';
     
     if (post.status !== 'approved' && !isAuthor && !isAdmin) {
+         // Trường hợp fetchPosts trả về bài viết nhưng không phải 'approved' và user không phải tác giả/admin
          if(container) container.innerHTML = '<h1 class="text-3xl font-bold text-red-500 text-center">Bài viết này chưa được phê duyệt hoặc đã bị từ chối.</h1>';
          return;
     }
@@ -580,8 +596,7 @@ async function renderPostDetail() {
     
     container.innerHTML = contentHtml;
 }
-window.deletePost = deletePost;
-
+window.renderPostDetail = renderPostDetail;
 
 
 // Hàm xóa bài viết (Sử dụng lại logic từ trang Profile)
@@ -650,7 +665,7 @@ async function renderAllPostsForAdmin() {
     container.innerHTML = '<p class="text-center text-teal-600 py-10">Đang tải TẤT CẢ bài viết...</p>';
 
     // Lấy TẤT CẢ bài viết (status: 'all' là tham số tùy chỉnh trong get_posts.php)
-    const allPosts = await fetchPosts({ status: 'all' });
+    const allPosts = await fetchPosts({ status: 'all', author: localStorage.getItem('username') });
 
     if (allPosts.length === 0) {
         container.innerHTML = `<p class="text-center text-gray-500 py-10">Không có bài viết nào trong hệ thống.</p>`;
@@ -672,7 +687,7 @@ async function renderAllPostsForAdmin() {
             </button>`;
 
         return `
-            <div class="admin-post-item border-l-4 ${statusBorder}" data-post-id="${post.id}">
+            <div class="admin-post-item bg-white p-4 rounded-xl shadow-md space-y-3 mb-4 border-l-4 ${statusBorder}" data-post-id="${post.id}">
                 <div class="flex justify-between items-start">
                     <div>
                         <a href="chitiet.html?id=${post.id}" class="text-lg font-bold text-gray-800 hover:text-red-600">${post.title}</a>
@@ -701,7 +716,8 @@ async function renderAdminDashboard() {
     
     container.innerHTML = '<p class="text-center text-teal-600 py-10">Đang tải bài viết đang chờ duyệt...</p>';
 
-    const pendingPosts = await fetchPosts({ status: 'pending' });
+    // Thêm author: localStorage.getItem('username') vào để get_posts.php không lọc (nếu cần)
+    const pendingPosts = await fetchPosts({ status: 'pending', author: localStorage.getItem('username') });
 
     if (pendingPosts.length === 0) {
         container.innerHTML = `<p class="text-center text-gray-500 py-10">Không có bài viết nào đang chờ duyệt. 🎉</p>`;
@@ -781,7 +797,7 @@ async function handleSubmitPost(event) {
 
         if (response.ok && result.success) {
             alert(result.message);
-            // Chuyển hướng về trang profile sau khi đăng bài
+            // FIX: Chuyển hướng về trang profile sau khi đăng bài để kích hoạt renderMyPosts() cập nhật postCount
             window.location.href = 'profile.html'; 
         } else {
             alert('Lỗi Đăng bài: ' + (result.message || 'Lỗi không xác định.'));
