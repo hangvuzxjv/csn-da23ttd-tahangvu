@@ -2240,30 +2240,33 @@ function addChatMessage(message, sender, isTyping = false) {
 }
 
 function formatBotMessage(message) {
-    // Convert markdown-like formatting to HTML
+    // Detect if mobile device
+    const isMobile = window.innerWidth <= 768;
+    
+    // Convert markdown-like formatting to HTML with mobile optimization
     let formatted = message
         // Bold text: **text** -> <strong>text</strong>
-        .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-teal-700">$1</strong>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-teal-700 text-sm">$1</strong>')
         // Emoji bullets: 🔹 -> proper spacing
-        .replace(/🔹/g, '<span class="inline-block mr-2">🔹</span>')
+        .replace(/🔹/g, '<span class="inline-block mr-1">🔹</span>')
         // Line breaks
         .replace(/\n/g, '<br>')
-        // Sections with emojis
-        .replace(/📋 \*\*(.*?)\*\*/g, '<div class="mt-3 mb-2"><span class="text-lg">📋</span> <strong class="font-semibold text-gray-800">$1</strong></div>')
-        .replace(/🌊 \*\*(.*?)\*\*/g, '<div class="mt-3 mb-2"><span class="text-lg">🌊</span> <strong class="font-semibold text-blue-600">$1</strong></div>')
-        .replace(/🦐 \*\*(.*?)\*\*/g, '<div class="mt-3 mb-2"><span class="text-lg">🦐</span> <strong class="font-semibold text-orange-600">$1</strong></div>')
-        .replace(/🐟 \*\*(.*?)\*\*/g, '<div class="mt-3 mb-2"><span class="text-lg">🐟</span> <strong class="font-semibold text-blue-500">$1</strong></div>')
-        .replace(/🏥 \*\*(.*?)\*\*/g, '<div class="mt-3 mb-2"><span class="text-lg">🏥</span> <strong class="font-semibold text-red-600">$1</strong></div>')
-        .replace(/💰 \*\*(.*?)\*\*/g, '<div class="mt-3 mb-2"><span class="text-lg">💰</span> <strong class="font-semibold text-green-600">$1</strong></div>')
-        .replace(/🔬 \*\*(.*?)\*\*/g, '<div class="mt-3 mb-2"><span class="text-lg">🔬</span> <strong class="font-semibold text-purple-600">$1</strong></div>')
-        // List items with dashes
-        .replace(/- (.*?)(?=<br>|$)/g, '<div class="ml-4 mb-1">• $1</div>')
-        // Checkmarks
-        .replace(/✅ \*\*(.*?)\*\*/g, '<div class="mt-2 mb-1"><span class="text-green-500">✅</span> <strong class="font-medium">$1</strong></div>')
-        // Color codes for different statuses
-        .replace(/🔴 \*\*(.*?)\*\*/g, '<div class="mt-2 mb-1 p-2 bg-red-50 rounded border-l-4 border-red-400"><span class="text-red-500">🔴</span> <strong class="font-medium text-red-700">$1</strong></div>')
-        .replace(/🟡 \*\*(.*?)\*\*/g, '<div class="mt-2 mb-1 p-2 bg-yellow-50 rounded border-l-4 border-yellow-400"><span class="text-yellow-500">🟡</span> <strong class="font-medium text-yellow-700">$1</strong></div>')
-        .replace(/🟠 \*\*(.*?)\*\*/g, '<div class="mt-2 mb-1 p-2 bg-orange-50 rounded border-l-4 border-orange-400"><span class="text-orange-500">🟠</span> <strong class="font-medium text-orange-700">$1</strong></div>');
+        // Sections with emojis - mobile optimized
+        .replace(/📋 \*\*(.*?)\*\*/g, `<div class="mt-2 mb-1 ${isMobile ? 'text-xs' : 'text-sm'}"><span class="${isMobile ? 'text-base' : 'text-lg'}">📋</span> <strong class="font-semibold text-gray-800">${isMobile ? '' : ' '}$1</strong></div>`)
+        .replace(/🌊 \*\*(.*?)\*\*/g, `<div class="mt-2 mb-1 ${isMobile ? 'text-xs' : 'text-sm'}"><span class="${isMobile ? 'text-base' : 'text-lg'}">🌊</span> <strong class="font-semibold text-blue-600">${isMobile ? '' : ' '}$1</strong></div>`)
+        .replace(/🦐 \*\*(.*?)\*\*/g, `<div class="mt-2 mb-1 ${isMobile ? 'text-xs' : 'text-sm'}"><span class="${isMobile ? 'text-base' : 'text-lg'}">🦐</span> <strong class="font-semibold text-orange-600">${isMobile ? '' : ' '}$1</strong></div>`)
+        .replace(/🐟 \*\*(.*?)\*\*/g, `<div class="mt-2 mb-1 ${isMobile ? 'text-xs' : 'text-sm'}"><span class="${isMobile ? 'text-base' : 'text-lg'}">🐟</span> <strong class="font-semibold text-blue-500">${isMobile ? '' : ' '}$1</strong></div>`)
+        .replace(/🏥 \*\*(.*?)\*\*/g, `<div class="mt-2 mb-1 ${isMobile ? 'text-xs' : 'text-sm'}"><span class="${isMobile ? 'text-base' : 'text-lg'}">🏥</span> <strong class="font-semibold text-red-600">${isMobile ? '' : ' '}$1</strong></div>`)
+        .replace(/💰 \*\*(.*?)\*\*/g, `<div class="mt-2 mb-1 ${isMobile ? 'text-xs' : 'text-sm'}"><span class="${isMobile ? 'text-base' : 'text-lg'}">💰</span> <strong class="font-semibold text-green-600">${isMobile ? '' : ' '}$1</strong></div>`)
+        .replace(/🔬 \*\*(.*?)\*\*/g, `<div class="mt-2 mb-1 ${isMobile ? 'text-xs' : 'text-sm'}"><span class="${isMobile ? 'text-base' : 'text-lg'}">🔬</span> <strong class="font-semibold text-purple-600">${isMobile ? '' : ' '}$1</strong></div>`)
+        // List items with dashes - mobile optimized
+        .replace(/- (.*?)(?=<br>|$)/g, `<div class="${isMobile ? 'ml-2 mb-1 text-xs' : 'ml-4 mb-1 text-sm'}">• $1</div>`)
+        // Checkmarks - mobile optimized
+        .replace(/✅ \*\*(.*?)\*\*/g, `<div class="mt-1 mb-1 ${isMobile ? 'text-xs' : 'text-sm'}"><span class="text-green-500">✅</span> <strong class="font-medium">${isMobile ? '' : ' '}$1</strong></div>`)
+        // Color codes for different statuses - mobile optimized
+        .replace(/🔴 \*\*(.*?)\*\*/g, `<div class="mt-1 mb-1 ${isMobile ? 'p-1.5 text-xs' : 'p-2 text-sm'} bg-red-50 rounded border-l-3 border-red-400"><span class="text-red-500">🔴</span> <strong class="font-medium text-red-700">${isMobile ? '' : ' '}$1</strong></div>`)
+        .replace(/🟡 \*\*(.*?)\*\*/g, `<div class="mt-1 mb-1 ${isMobile ? 'p-1.5 text-xs' : 'p-2 text-sm'} bg-yellow-50 rounded border-l-3 border-yellow-400"><span class="text-yellow-500">🟡</span> <strong class="font-medium text-yellow-700">${isMobile ? '' : ' '}$1</strong></div>`)
+        .replace(/🟠 \*\*(.*?)\*\*/g, `<div class="mt-1 mb-1 ${isMobile ? 'p-1.5 text-xs' : 'p-2 text-sm'} bg-orange-50 rounded border-l-3 border-orange-400"><span class="text-orange-500">🟠</span> <strong class="font-medium text-orange-700">${isMobile ? '' : ' '}$1</strong></div>`);
     
     return formatted;
 }
@@ -2279,6 +2282,41 @@ function removeTypingIndicator() {
 window.toggleChatbot = toggleChatbot;
 window.handleChatKeyPress = handleChatKeyPress;
 window.sendChatMessage = sendChatMessage;
+
+// Mobile menu functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    
+    if (mobileMenuToggle && mobileMenu) {
+        mobileMenuToggle.addEventListener('click', function() {
+            mobileMenu.classList.toggle('hidden');
+            
+            // Change hamburger icon
+            if (mobileMenu.classList.contains('hidden')) {
+                mobileMenuToggle.textContent = '☰';
+            } else {
+                mobileMenuToggle.textContent = '✕';
+            }
+        });
+        
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!mobileMenuToggle.contains(event.target) && !mobileMenu.contains(event.target)) {
+                mobileMenu.classList.add('hidden');
+                mobileMenuToggle.textContent = '☰';
+            }
+        });
+        
+        // Close mobile menu when window is resized to desktop
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 1024) {
+                mobileMenu.classList.add('hidden');
+                mobileMenuToggle.textContent = '☰';
+            }
+        });
+    }
+});
 
 // =========================================================
 // CHỨC NĂNG: CÁC HÀNH ĐỘNG CHO TRANG CHI TIẾT

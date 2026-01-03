@@ -2,6 +2,168 @@
    style.css - KIỂU DÁNG BỔ SUNG CHO TOÀN BỘ TRANG WEB
    ========================================================= */
 
+/* Mobile-first responsive design */
+@media (max-width: 768px) {
+    /* Header responsive */
+    .header-container {
+        padding: 0.75rem 1rem;
+    }
+    
+    .logo-text {
+        font-size: 1.25rem !important;
+    }
+    
+    /* Navigation menu */
+    .nav-menu {
+        font-size: 0.875rem;
+    }
+    
+    /* Main content */
+    .main-content {
+        padding: 1rem;
+    }
+    
+    /* Cards and sections */
+    .card, .section {
+        margin-bottom: 1rem;
+        padding: 1rem;
+    }
+    
+    /* Buttons */
+    .btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+    }
+    
+    /* Images */
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+    
+    /* Tables */
+    table {
+        font-size: 0.875rem;
+    }
+    
+    /* Forms */
+    input, textarea, select {
+        font-size: 16px; /* Prevent zoom on iOS */
+    }
+}
+
+/* Chatbot mobile optimization */
+@media (max-width: 768px) {
+    /* Chatbot toggle button */
+    #chatbot-toggle {
+        bottom: 1rem !important;
+        right: 1rem !important;
+        z-index: 1000;
+    }
+    
+    #chatbot-toggle button {
+        width: 3.5rem !important;
+        height: 3.5rem !important;
+        font-size: 1.25rem !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    /* Chatbot window */
+    #chatbot-window {
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        max-width: none !important;
+        height: 70vh !important;
+        border-radius: 1rem 1rem 0 0 !important;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+        z-index: 999;
+    }
+    
+    /* Chatbot header */
+    #chatbot-window .bg-teal-600 {
+        padding: 1rem 1.25rem;
+        border-radius: 1rem 1rem 0 0;
+    }
+    
+    #chatbot-window h3 {
+        font-size: 1.125rem !important;
+    }
+    
+    /* Chat messages container */
+    #chat-messages {
+        height: calc(70vh - 120px) !important;
+        padding: 1rem;
+        font-size: 0.875rem;
+    }
+    
+    /* Chat messages */
+    #chat-messages .bg-teal-600 {
+        margin-left: 2rem !important;
+        margin-right: 0.5rem !important;
+        padding: 0.75rem 1rem !important;
+        font-size: 0.875rem !important;
+    }
+    
+    #chat-messages .bg-white {
+        margin-right: 2rem !important;
+        margin-left: 0.5rem !important;
+        padding: 0.75rem 1rem !important;
+        font-size: 0.875rem !important;
+        line-height: 1.4;
+    }
+    
+    /* Chat input area */
+    #chatbot-window .border-t {
+        padding: 1rem;
+        background: white;
+    }
+    
+    #chat-input {
+        font-size: 16px !important; /* Prevent zoom */
+        padding: 0.75rem !important;
+        border-radius: 0.5rem !important;
+    }
+    
+    /* Send button */
+    #chatbot-window button[onclick="sendChatMessage()"] {
+        padding: 0.75rem 1rem !important;
+        font-size: 0.875rem !important;
+        min-width: 60px;
+    }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+    .main-content {
+        padding: 0.75rem;
+    }
+    
+    .card, .section {
+        padding: 0.75rem;
+    }
+    
+    /* Chatbot adjustments for very small screens */
+    #chatbot-window {
+        height: 80vh !important;
+    }
+    
+    #chat-messages {
+        height: calc(80vh - 120px) !important;
+        padding: 0.75rem;
+    }
+    
+    #chat-messages .bg-teal-600,
+    #chat-messages .bg-white {
+        margin-left: 0.25rem !important;
+        margin-right: 0.25rem !important;
+        padding: 0.5rem 0.75rem !important;
+        font-size: 0.8rem !important;
+    }
+}
+
 /* Thanh cuộn tùy chỉnh (Chỉ hoạt động trên trình duyệt Webkit) */
 ::-webkit-scrollbar {
     width: 8px;
